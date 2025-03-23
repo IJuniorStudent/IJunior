@@ -4,6 +4,8 @@ class Program
 {
     static void Main(string[] args)
     {
+        int firstFactor = 3;
+        int secondFactor = 5;
         int maxRandomNumber = 100;
         
         Random random = new Random();
@@ -12,10 +14,7 @@ class Program
         
         for (int i = 0; i <= number; i++)
         {
-            bool isCounterFactorOf3 = i % 3 == 0;
-            bool isCounterFactorOf5 = i % 5 == 0;
-            
-            if (isCounterFactorOf3 || isCounterFactorOf5)
+            if (i % firstFactor == 0 || i % secondFactor == 0)
                 sum += i;
         }
         
