@@ -21,64 +21,26 @@ class Program
             
             Console.WriteLine();
             
-            switch (ReadUserInput("Укажите номер действия"))
+            string userCommand = ReadUserInput("Укажите номер действия");
+            
+            Console.Clear();
+            
+            switch (userCommand)
             {
                 case CommandAddEmployee:
-                    Console.Clear();
-                    
-                    string firstName = ReadUserInput("Введите имя");
-                    string lastName = ReadUserInput("Введите фамилию");
-                    string parentName = ReadUserInput("Введите отчество");
-                    string job = ReadUserInput("Укажите должность");
-                    
-                    AddEmployee(ref employeeNames, ref employeeJobs, $"{lastName} {firstName} {parentName}", job);
-                    
-                    Console.Clear();
+                    HandleCommandAdd(ref employeeNames, ref employeeJobs);
                     break;
                 
                 case CommandPrintAllEmployees:
-                    Console.Clear();
-                    PrintEmployeesList(employeeNames, employeeJobs);
-                    Console.WriteLine();
+                    HandleCommandPrintAll(employeeNames, employeeJobs);
                     break;
                 
                 case CommandRemoveEmployee:
-                    Console.Clear();
-                    
-                    if (employeeNames.Length == 0)
-                    {
-                        Console.WriteLine("Список сотрудников пуст\n");
-                        continue;
-                    }
-                    
-                    if (ReadNumberInput("Укажите номер сотрудника", out int employeeNumber) == false)
-                    {
-                        Console.WriteLine("Число введено некорректно\n");
-                        continue;
-                    }
-                    
-                    employeeNumber--;
-                    
-                    if (employeeNumber < 0 || employeeNumber >= employeeNames.Length)
-                    {
-                        Console.WriteLine($"Сотрудник с номером {employeeNumber + 1} отсутствует\n");
-                        continue;
-                    }
-                    
-                    RemoveEmployee(ref employeeNames, ref employeeJobs, employeeNumber - 1);
-                    
-                    Console.WriteLine("Данные сотрудника успешно удалены");
-                    Console.WriteLine();
+                    HandleCommandRemove(ref employeeNames, ref employeeJobs);
                     break;
                 
                 case CommandFindEmployee:
-                    Console.Clear();
-                    
-                    string userInput = ReadUserInput("Введите фамилию сотрудника");
-                    
-                    SearchEmployeeByName(employeeNames, employeeJobs, userInput);
-                    
-                    Console.WriteLine();
+                    HandleCommandFind(employeeNames, employeeJobs);
                     break;
                 
                 case CommandExit:
@@ -97,6 +59,69 @@ class Program
         Console.WriteLine($"{CommandFindEmployee} - Найти досье по фамилии");
         Console.WriteLine($"{CommandExit} - Выход");
     }
+ 
+    static void HandleCommandAdd(ref string[] names, ref string[] jobs)
+    {
+        string firstName = ReadUserInput("Введите имя");
+        string lastName = ReadUserInput("Введите фамилию");
+        string parentName = ReadUserInput("Введите отчество");
+        string job = ReadUserInput("Укажите должность");
+                    
+        AddEmployee(ref names, ref jobs, $"{lastName} {firstName} {parentName}", job);
+                    
+        Console.Clear();
+    }
+ 
+    static void HandleCommandPrintAll(string[] names, string[] jobs)
+    {
+        for (int i = 0; i < names.Length; i++)
+            PrintEmployee(i + 1, names[i], jobs[i]);
+        
+        Console.WriteLine();
+    }
+ 
+    static void HandleCommandRemove(ref string[] names, ref string[] jobs)
+    {
+        if (names.Length == 0)
+        {
+            Console.WriteLine("Список сотрудников пуст\n");
+            return;
+        }
+ 
+        int employeeNumber = GetNumberFromInput("Укажите номер сотрудника");
+        int employeeIndex = employeeNumber - 1;
+ 
+        if (employeeIndex < 0 || employeeIndex >= names.Length)
+        {
+            Console.WriteLine($"Сотрудник с номером {employeeNumber} отсутствует\n");
+            return;
+        }
+ 
+        RemoveEmployee(ref names, ref jobs, employeeIndex);
+                    
+        Console.WriteLine("Данные сотрудника успешно удалены");
+        Console.WriteLine();
+    }
+ 
+    static void HandleCommandFind(string[] names, string[] jobs)
+    {
+        string userInput = ReadUserInput("Введите фамилию сотрудника");
+        bool isAnyFound = false;
+        
+        for (int i = 0; i < names.Length; i++)
+        {
+            if (names[i].ToLower().StartsWith(userInput.ToLower()))
+            {
+                PrintEmployee(i + 1, names[i], jobs[i]);
+                isAnyFound = true;
+            }
+        }
+        
+        if (isAnyFound == false)
+            Console.WriteLine("Сотрудник с такой фамилией не найден");
+        
+        Console.WriteLine();
+    }
     
     static string ReadUserInput(string promptMessage)
     {
@@ -109,6 +134,19 @@ class Program
     static bool ReadNumberInput(string promptMessage, out int number)
     {
         return int.TryParse(ReadUserInput(promptMessage), out number);
+    }
+ 
+    static int GetNumberFromInput(string promptMessage)
+    {
+        int number;
+        
+        while (ReadNumberInput(promptMessage, out number) == false)
+        {
+            Console.Clear();
+            Console.WriteLine("Число введено некорректно, попробуйте снова\n");
+        }
+ 
+        return number;
     }
     
     static void AddEmployee(ref string[] names, ref string[] jobs, string employeeName, string jobName)
@@ -126,21 +164,6 @@ class Program
     static void PrintEmployee(int employeeIndex, string name, string job)
     {
         Console.WriteLine($"{employeeIndex}. {name} - {job}");
-    }
-    
-    static void PrintEmployeesList(string[] names, string[] jobs)
-    {
-        for (int i = 0; i < names.Length; i++)
-            PrintEmployee(i + 1, names[i], jobs[i]);
-    }
-    
-    static void SearchEmployeeByName(string[] names, string[] jobs, string employeeName)
-    {
-        for (int i = 0; i < names.Length; i++)
-        {
-            if (names[i].ToLower().Contains(employeeName.ToLower()))
-                PrintEmployee(i + 1, names[i], jobs[i]);
-        }
     }
     
     static void AddElement(ref string[] list, string element)
@@ -161,15 +184,12 @@ class Program
             return;
         
         string[] newList = new string[list.Length - 1];
-        int newListIndex = 0;
         
-        for (int i = 0; i < list.Length; i++)
-        {
-            if (i == index)
-                continue;
-            
-            newList[newListIndex++] = list[i];
-        }
+        for (int i = 0; i < index; i++)
+            newList[i] = list[i];
+        
+        for (int i = index + 1; i < list.Length; i++)
+            newList[i - 1] = list[i];
         
         list = newList;
     }
