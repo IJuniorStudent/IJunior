@@ -9,9 +9,7 @@ class Program
         const string CommandDisplayEmploeeList = "3";
         const string CommandExit = "4";
         
-        List<string> employeeNames = new List<string>();
-        List<string> jobNames = new List<string>();
-        Dictionary<string, int> jobStats = new Dictionary<string, int>();
+        Dictionary<string, List<string>> employeeDatabase = new Dictionary<string, List<string>>();
         bool isAppRun = true;
         
         while (isAppRun)
@@ -29,15 +27,15 @@ class Program
             switch (userInput)
             {
                 case CommandAddEmployee:
-                    AddEmployee(employeeNames, jobNames, jobStats);
+                    AddEmployee(employeeDatabase);
                     break;
                 
                 case CommandRemoveEmployee:
-                    RemoveEmployee(employeeNames, jobNames, jobStats);
+                    RemoveEmployees(employeeDatabase);
                     break;
                 
                 case CommandDisplayEmploeeList:
-                    DisplayEmployeeList(employeeNames, jobNames, jobStats);
+                    DisplayEmployeeList(employeeDatabase);
                     break;
                 
                 case CommandExit:
@@ -45,67 +43,82 @@ class Program
                     break;
                 
                 default:
-                    Console.WriteLine($"Неизвестный номер операции: \"{userInput}\"");
-                    WaitAnyKeyPress();
+                    DisplayWaitMessage($"Неизвестный номер операции: \"{userInput}\"");
                     break;
             }
         }
     }
     
-    static void AddEmployee(List<string> names, List<string> jobs, Dictionary<string, int> stats)
+    static string FormatEmployeeName(string fistName, string lastName)
+    {
+        return $"{lastName} {fistName}";
+    }
+    
+    static void AddEmployee(Dictionary<string, List<string>> database)
     {
         Console.Clear();
+        Console.WriteLine("Добавление сотрудника");
+        Console.WriteLine();
         
         string firstName = ReadUserInput("Введите имя");
         string lastName = ReadUserInput("Введите фамилию");
         string jobName = ReadUserInput("Введите должность");
         
-        names.Add($"{lastName} {firstName}");
-        jobs.Add(jobName);
+        if (database.ContainsKey(jobName) == false)
+            database.Add(jobName, []);
         
-        if (stats.ContainsKey(jobName) == false)
-            stats.Add(jobName, 0);
-        
-        stats[jobName]++;
+        database[jobName].Add(FormatEmployeeName(firstName, lastName));
     }
     
-    static void RemoveEmployee(List<string> names, List<string> jobs, Dictionary<string, int> stats)
+    static void RemoveEmployees(Dictionary<string, List<string>> database)
     {
-        int employeeNumber = ReadNumberInput("Введите номер сотрудника для удаления");
-        int employeeIndex = employeeNumber - 1;
+        Console.Clear();
+        Console.WriteLine("Удаление сотрудника");
+        Console.WriteLine();
         
-        if (employeeIndex < 0 || employeeIndex >= names.Count)
+        string firstName = ReadUserInput("Введите имя");
+        string lastName = ReadUserInput("Введите фамилию");
+        
+        string fullName = FormatEmployeeName(firstName, lastName);
+        List<string> jobNames = database.Keys.ToList();
+        int removedCount = 0;
+        
+        foreach (var jobName in jobNames)
         {
-            Console.WriteLine($"Сотрудник с номером {employeeNumber} отсутствует в списке");
-            WaitAnyKeyPress();
-            return;
+            removedCount += database[jobName].RemoveAll(element => element == fullName);
+            
+            if (database[jobName].Count == 0)
+                database.Remove(jobName);
         }
         
-        string jobName = jobs[employeeIndex];
-        
-        names.RemoveAt(employeeIndex);
-        jobs.RemoveAt(employeeIndex);
-        
-        stats[jobName]--;
-        
-        if (stats[jobName] == 0)
-            stats.Remove(jobName);
+        if (removedCount > 0)
+            DisplayWaitMessage($"Удалено {removedCount} сотрудников с именем \"{fullName}\"");
+        else
+            DisplayWaitMessage($"Сотрудники с именем \"{fullName}\" не найдены");
     }
     
-    static void DisplayEmployeeList(List<string> names, List<string> jobs, Dictionary<string, int> stats)
+    static void DisplayEmployeeList(Dictionary<string, List<string>> database)
     {
         Console.Clear();
         
-        Console.WriteLine("Список сотрудников:");
+        if (database.Count == 0)
+        {
+            DisplayWaitMessage("В базе данных нет ни одного сотрудника");
+            return;
+        }
         
-        for (int i = 0; i < names.Count; i++)
-            Console.WriteLine($"{i + 1}. {names[i]} - {jobs[i]}");
-        
+        Console.WriteLine("Список должностей и сотрудников:");
         Console.WriteLine();
-        Console.WriteLine("Текущие должности:");
-        
-        foreach (var jobStat in stats)
-            Console.WriteLine($"{jobStat.Key} - {jobStat.Value}");
+ 
+        foreach (var job in database)
+        {
+            Console.WriteLine(job.Key);
+            
+            foreach (string employeeName in job.Value)
+                Console.WriteLine($"- {employeeName}");
+            
+            Console.WriteLine();
+        }
         
         WaitAnyKeyPress();
     }
@@ -118,17 +131,10 @@ class Program
         return Console.ReadLine();
     }
     
-    static int ReadNumberInput(string promptMessage)
+    static void DisplayWaitMessage(string message)
     {
-        int number;
-        
-        while (int.TryParse(ReadUserInput(promptMessage), out number) == false)
-        {
-            Console.WriteLine("Число введено некорректно");
-            WaitAnyKeyPress();
-        }
-        
-        return number;
+        Console.WriteLine(message);
+        WaitAnyKeyPress();
     }
     
     static void WaitAnyKeyPress()
