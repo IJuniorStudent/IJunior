@@ -6,17 +6,20 @@ class Program
     {
         const string CommandExit = "exit";
         
-        PlayTable table = new PlayTable();
+        CardsDeck deck = new CardsDeck();
+        Player player = new Player();
+        Dealer dealer = new Dealer();
+        
         bool isAppRun = true;
         
         while (isAppRun)
         {
             Console.Clear();
             
-            Console.WriteLine($"Введите количество карт, которое хотите взять у крупье или команту {CommandExit} для выхода.");
+            Console.WriteLine($"Введите количество карт, которое хотите взять у крупье или команду {CommandExit} для выхода.");
+            Console.WriteLine($"Количество карт в колоде: {deck.Count}");
             
-            table.DisplayDealerDeckSize();
-            table.DisplayPlayerDeck();
+            player.DisplayCards();
             
             Console.WriteLine();
             Console.Write("> ");
@@ -30,7 +33,7 @@ class Program
                     break;
                 
                 default:
-                    table.TryMoveCardsFromDealerToPlayer(userInput);
+                    dealer.TryGiveCardsToPlayer(player, deck, userInput);
                     break;
             }
         }
@@ -53,144 +56,92 @@ class Card
 
 class CardsDeck
 {
-    protected List<Card> Cards;
+    private List<Card> _cards;
     
     public CardsDeck()
     {
-        Cards = new List<Card>();
+        _cards = GenerateCards();
     }
     
-    public int Count => Cards.Count;
-    
-    public void Push(Card card)
-    {
-        Cards.Add(card);
-    }
+    public int Count => _cards.Count;
     
     public Card PopFrom(int index)
     {
-        Card card = Cards[index];
-        Cards.RemoveAt(index);
+        Card card = _cards[index];
+        _cards.RemoveAt(index);
         
         return card;
     }
     
-    public void Print()
+    private List<Card> GenerateCards()
     {
-        if (Cards.Count == 0)
-        {
-            Console.WriteLine("Колода не содержит карт");
-            return;
-        }
+        var cards = new List<Card>();
         
-        foreach (var card in Cards)
-            Console.WriteLine(card.Type);
-    }
-}
-
-class FullCardsDeck : CardsDeck
-{
-    public FullCardsDeck()
-    {
         string[] suits = [ "Бубны", "Черви", "Пики", "Трефы" ];
         string[] ranks = [ "6", "7", "8", "9", "Валет", "Дама", "Король", "Туз" ];
         
         foreach (var suit in suits)
             foreach (var rank in ranks)
-                Cards.Add(new Card(rank, suit));
-    }
-    
-    public void Shuffle(Random random)
-    {
-        int cardsCount = Cards.Count;
+                cards.Add(new Card(rank, suit));
         
-        for (int i = 0; i < cardsCount; i++)
-        {
-            int nextIndex = random.Next(i, cardsCount);
-            (Cards[nextIndex], Cards[i]) = (Cards[i], Cards[nextIndex]);
-        }
+        return cards;
     }
 }
 
 class Dealer
 {
     private Random _random;
-    private FullCardsDeck _deck;
     
     public Dealer()
     {
         _random = new Random();
-        _deck = new FullCardsDeck();
-        
-        _deck.Shuffle(_random);
     }
     
-    public int DeckSize => _deck.Count;
-    
-    public Card PopRandomCard()
+    public void TryGiveCardsToPlayer(Player player, CardsDeck deck, string userRequest)
     {
-        return _deck.PopFrom(_random.Next(0, _deck.Count));
+        if (int.TryParse(userRequest, out int cardsCount) == false)
+        {
+            Utils.PrintWaitMessage($"Нет такого числа: \"{userRequest}\"");
+            return;
+        }
+        
+        if (deck.Count < cardsCount)
+        {
+            Utils.PrintWaitMessage("В колоде недостаточно карт");
+            return;
+        }
+        
+        for (int i = 0; i < cardsCount; i++)
+            player.TakeCard(deck.PopFrom(_random.Next(0, deck.Count)));
     }
 }
 
 class Player
 {
-    private CardsDeck _deck;
+    private List<Card> _cards;
     
     public Player()
     {
-        _deck = new CardsDeck();
+        _cards = new List<Card>();
     }
     
-    public void Take(Card card)
+    public void TakeCard(Card card)
     {
-        _deck.Push(card);
+        _cards.Add(card);
     }
     
-    public void DisplayDeck()
+    public void DisplayCards()
     {
-        _deck.Print();
-    }
-}
-
-class PlayTable
-{
-    private Dealer _dealer;
-    private Player _player;
-    
-    public PlayTable()
-    {
-        _dealer = new Dealer();
-        _player = new Player();
-    }
-    
-    public void DisplayDealerDeckSize()
-    {
-        Console.WriteLine($"Количество карт в колоде у крупье: {_dealer.DeckSize}");
-    }
-    
-    public void DisplayPlayerDeck()
-    {
-        Console.WriteLine("Колода игрока:");
-        _player.DisplayDeck();
-    }
-    
-    public void TryMoveCardsFromDealerToPlayer(string userInput)
-    {
-        if (int.TryParse(userInput, out int cardsCount) == false)
+        if (_cards.Count == 0)
         {
-            Utils.PrintWaitMessage("Введено некорректное число");
+            Console.WriteLine("У игрока на руках нет карт");
             return;
         }
         
-        if (_dealer.DeckSize < cardsCount)
-        {
-            Utils.PrintWaitMessage("У крупье недостаточно карт");
-            return;
-        }
+        Console.WriteLine("Карты игрока:");
         
-        for (int i = 0; i < cardsCount; i++)
-            _player.Take(_dealer.PopRandomCard());
+        foreach (var card in _cards)
+            Console.WriteLine(card.Type);
     }
 }
 
