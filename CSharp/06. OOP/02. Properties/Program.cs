@@ -11,6 +11,7 @@ class Program
         
         Console.CursorVisible = false;
         
+        Renderer renderer = new Renderer();
         Player player = new Player(playerStartX, playerStartY, playerAppearance);
         bool isAppRun = true;
         
@@ -18,7 +19,7 @@ class Program
         {
             Console.Clear();
             
-            Rederer.DrawPlayer(player);
+            renderer.DrawPlayer(player);
             
             ConsoleKey pressedKey = Console.ReadKey(true).Key;
             
@@ -30,23 +31,23 @@ class Program
 
 class Player
 {
-    public int X { get; private set; }
-    public int Y { get; private set; }
-    public char Appearance { get; private set; }
-    
-    public Player(int x, int y, char appearance)
+    public Player(int positionX, int positionY, char appearance)
     {
-        X = x;
-        Y = y;
+        PositionX = positionX;
+        PositionY = positionY;
         Appearance = appearance;
     }
+    
+    public int PositionX { get; private set; }
+    public int PositionY { get; private set; }
+    public char Appearance { get; private set; }
 }
 
-class Rederer
+class Renderer
 {
-    public static void DrawPlayer(Player player)
+    public void DrawPlayer(Player player)
     {
-        Console.SetCursorPosition(player.X, player.Y);
+        Console.SetCursorPosition(player.PositionX, player.PositionY);
         Console.Write(player.Appearance);
     }
 }
