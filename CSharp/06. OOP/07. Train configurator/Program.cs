@@ -41,13 +41,19 @@ class Program
 
 class Wagon
 {
-    public const int PassengerCapacity = 40;
-    
     private int _passengersCount;
     
     public Wagon()
     {
         _passengersCount = 0;
+    }
+    
+    public int SoldPlaces => _passengersCount;
+    private int FreePlaces => GetCapacity() - _passengersCount;
+    
+    public virtual int GetCapacity()
+    {
+        return 40;
     }
     
     public void PlacePassengers(int passengersCount)
@@ -60,32 +66,38 @@ class Wagon
     
     public int PlaceToCapacity(int passengersCount)
     {
-        int passengersToPlace = Math.Min(passengersCount, PassengerCapacity);
+        int passengersToPlace = Math.Min(passengersCount, GetCapacity());
         
         PlacePassengers(passengersToPlace);
         
         return passengersToPlace;
     }
+}
+
+class Route
+{
+    public Route(string from, string to)
+    {
+        Departure = from;
+        Arrival = to;
+    }
     
-    public int SoldPlaces => _passengersCount;
-    
-    private int FreePlaces => PassengerCapacity - _passengersCount;
+    public string Departure { get; }
+    public string Arrival { get; }
+    public string Description => $"{Departure} - {Arrival}";
 }
 
 class Train
 {
     private List<Wagon> _wagons;
     
-    public Train(string startCityName, string targetCityName)
+    public Train(Route route)
     {
         _wagons = new List<Wagon>();
-        
-        StartCityName = startCityName;
-        TargetCityName = targetCityName;
+        Route = route;
     }
     
-    public string StartCityName { get; }
-    public string TargetCityName { get; }
+    public Route Route { get; }
     
     public void AddWagon(Wagon wagon)
     {
@@ -100,10 +112,10 @@ class Train
         foreach (var wagon in _wagons)
         {
             totalPassengers += wagon.SoldPlaces;
-            maxPassengers += Wagon.PassengerCapacity;
+            maxPassengers += wagon.GetCapacity();
         }
         
-        return $"[{StartCityName} - {TargetCityName}] Вагонов: {_wagons.Count}, всего мест: {maxPassengers}, продано мест: {totalPassengers}";
+        return $"[{Route.Description}] Вагонов: {_wagons.Count}, всего мест: {maxPassengers}, продано мест: {totalPassengers}";
     }
 }
 
@@ -132,13 +144,13 @@ class Dispatcher
     
     public void AddTrain()
     {
-        if (RequestPath(out string startCityName, out string targetCityName) == false)
+        if (TryCreateRoute(out Route? route) == false)
             return;
         
-        if (GetPassengersCount(out int passengersCount) == false)
+        if (TrySellTickets(out int soldTicketsCount) == false)
             return;
         
-        Train train = BuildTrain(startCityName, targetCityName, passengersCount);
+        Train train = CreateTrain(route, soldTicketsCount);
         
         if (ConfirmTrainConfiguration(train) == false)
             return;
@@ -146,42 +158,53 @@ class Dispatcher
         _trains.Add(train);
     }
     
-    private bool RequestPath(out string startCityName, out string targetCityName)
+    private bool TryCreateRoute(out Route? route)
     {
         Console.Clear();
         
-        startCityName = Utils.ReadUserInput("Введите город отправления");
-        targetCityName = Utils.ReadUserInput("Введите город прибытия");
+        string startCityName = Utils.ReadUserInput("Введите город отправления");
+        string targetCityName = Utils.ReadUserInput("Введите город прибытия");
+        route = null;
         
         Console.WriteLine();
         
-        return Utils.ConfirmUserInput($"Отправление \"{startCityName}\", прибытие: \"{targetCityName}\"");
+        if (startCityName.ToLower() == targetCityName.ToLower())
+        {
+            Utils.PrintWaitMessage("Город отправления совпадает с городом прибытия. Невозможно создать маршрут");
+            return false;
+        }
+ 
+        if (Utils.ConfirmUserInput($"Отправление \"{startCityName}\", прибытие: \"{targetCityName}\"") == false)
+            return false;
+        
+        route = new Route(startCityName, targetCityName);
+        return true;
     }
     
-    private bool GetPassengersCount(out int passengersCount)
+    private bool TrySellTickets(out int soldTicketsCount)
     {
-        int minPassengerCount = 100;
-        int maxPassengerCount = 200;
+        int ticketsMinCount = 100;
+        int ticketsMaxCount = 200;
         
         Console.Clear();
         
-        passengersCount = _random.Next(minPassengerCount, maxPassengerCount + 1);
+        soldTicketsCount = _random.Next(ticketsMinCount, ticketsMaxCount + 1);
         
-        return Utils.ConfirmUserInput($"{passengersCount} пассажиров хотят купить билеты на поезд");
+        return Utils.ConfirmUserInput($"{soldTicketsCount} пассажиров приобрели билеты на поезд");
     }
     
-    private Train BuildTrain(string startCityName, string targetCityName, int passengersCount)
+    private Train CreateTrain(Route route, int requiredPassengersCount)
     {
         Console.Clear();
         
-        Train train = new Train(startCityName, targetCityName);
-        int passengersRemain = passengersCount;
+        Train train = new Train(route);
+        int passengersToPlace = requiredPassengersCount;
         
-        while (passengersRemain > 0)
+        while (passengersToPlace > 0)
         {
             Wagon wagon = new Wagon();
             
-            passengersRemain -= wagon.PlaceToCapacity(passengersRemain);
+            passengersToPlace -= wagon.PlaceToCapacity(passengersToPlace);
             
             train.AddWagon(wagon);
         }
@@ -214,5 +237,18 @@ class Utils
         Console.Write("> ");
         
         return Console.ReadLine();
+    }
+    
+    public static void PrintWaitMessage(string message)
+    {
+        Console.WriteLine(message);
+        
+        WaitAnyKeyPress();
+    }
+    
+    public static void WaitAnyKeyPress()
+    {
+        Console.WriteLine("Нажмите любую клавишу для продолжения...");
+        Console.ReadKey(true);
     }
 }
