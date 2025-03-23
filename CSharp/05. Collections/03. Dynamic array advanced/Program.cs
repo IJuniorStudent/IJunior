@@ -28,7 +28,7 @@ class Program
             switch (userInput)
             {
                 case CommandSumNumbers:
-                    HandleCommandSumNumbers(numbers);
+                    DisplayNumbersSum(numbers);
                     break;
                 
                 case CommandExit:
@@ -36,7 +36,7 @@ class Program
                     break;
                 
                 default:
-                    HandleCommandStoreNumber(userInput, numbers);
+                    StoreInputNumber(userInput, numbers);
                     break;
             }
             
@@ -50,19 +50,24 @@ class Program
             Console.Write($"{number} ");
     }
     
-    static void HandleCommandSumNumbers(List<int> numbers)
+    static int CalculateSum(List<int> numbers)
     {
-        int numberSum = 0;
+        int sum = 0;
         
         foreach (var number in numbers)
-            numberSum += number;
+            sum += number;
         
-        Console.WriteLine($"Сумма чисел: {numberSum}");
+        return sum;
+    }
+    
+    static void DisplayNumbersSum(List<int> numbers)
+    {
+        Console.WriteLine($"Сумма чисел: {CalculateSum(numbers)}");
         
         WaitAnyKeyPress();
     }
     
-    static void HandleCommandStoreNumber(string userInput, List<int> numbers)
+    static void StoreInputNumber(string userInput, List<int> numbers)
     {
         if (int.TryParse(userInput, out int number) == false)
         {
