@@ -4,13 +4,18 @@ class Program
 {
     static void Main(string[] args)
     {
-        Random randomNumberGenerator = new Random();
-        int number = randomNumberGenerator.Next(0, 101);
+        int maxRandomNumber = 100;
+        
+        Random random = new Random();
+        int number = random.Next(0, maxRandomNumber + 1);
         int sum = 0;
- 
+        
         for (int i = 0; i <= number; i++)
         {
-            if (i % 3 == 0 || i % 5 == 0)
+            bool isCounterFactorOf3 = i % 3 == 0;
+            bool isCounterFactorOf5 = i % 5 == 0;
+            
+            if (isCounterFactorOf3 || isCounterFactorOf5)
                 sum += i;
         }
         
