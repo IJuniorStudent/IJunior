@@ -36,7 +36,7 @@ class Program
             Console.WriteLine($"Средства на счету {CurrencyRubName}: {userRubWalletBalance}");
             Console.WriteLine($"Средства на счету {CurrencyUsdName}: {userUsdWalletBalance}");
             Console.WriteLine($"Средства на счету {CurrencyEurName}: {userEurWalletBalance}");
-            Console.WriteLine("");
+            Console.WriteLine();
             Console.WriteLine("Введите номер операции:");
             Console.WriteLine($"{CommandRubToUsdExchange}. Перевести средства со счета {CurrencyRubName} на счет {CurrencyUsdName}");
             Console.WriteLine($"{CommandUsdToRubExchange}. Перевести средства со счета {CurrencyUsdName} на счет {CurrencyRubName}");
@@ -49,46 +49,98 @@ class Program
             
             string userCommand = Console.ReadLine();
  
-            float walletToWithdrawBalance = 0.0f;
             float moneyAmountToExchange = 0.0f;
-            string currencyToWihdrawName = "";
             
             switch (userCommand)
             {
                 case CommandRubToUsdExchange:
-                    walletToWithdrawBalance = userRubWalletBalance;
-                    currencyToWihdrawName = CurrencyRubName;
                     Console.WriteLine(ExchangePromptFormatMessage, CurrencyRubName, CurrencyUsdName);
+                    Console.Write("> ");
+                    moneyAmountToExchange = Convert.ToSingle(Console.ReadLine());
+                    if (userRubWalletBalance < moneyAmountToExchange)
+                    {
+                        Console.Clear();
+                        Console.WriteLine($"На счету {CurrencyRubName} недостаточно средств для списания {moneyAmountToExchange}");
+                        Console.WriteLine();
+                        continue;
+                    }
+                    userRubWalletBalance -= moneyAmountToExchange;
+                    userUsdWalletBalance += moneyAmountToExchange * RubToUsdExchangeRate;
                     break;
-                    
+                
                 case CommandUsdToRubExchange:
-                    walletToWithdrawBalance = userUsdWalletBalance;
-                    currencyToWihdrawName = CurrencyUsdName;
                     Console.WriteLine(ExchangePromptFormatMessage, CurrencyUsdName, CurrencyRubName);
+                    Console.Write("> ");
+                    moneyAmountToExchange = Convert.ToSingle(Console.ReadLine());
+                    if (userUsdWalletBalance < moneyAmountToExchange)
+                    {
+                        Console.Clear();
+                        Console.WriteLine($"На счету {CurrencyUsdName} недостаточно средств для списания {moneyAmountToExchange}");
+                        Console.WriteLine();
+                        continue;
+                    }
+                    userUsdWalletBalance -= moneyAmountToExchange;
+                    userRubWalletBalance += moneyAmountToExchange * UsdToRubExchangeRate;
                     break;
- 
+                
                 case CommandRubToEurExchange:
-                    walletToWithdrawBalance = userRubWalletBalance;
-                    currencyToWihdrawName = CurrencyRubName;
                     Console.WriteLine(ExchangePromptFormatMessage, CurrencyRubName, CurrencyEurName);
+                    Console.Write("> ");
+                    moneyAmountToExchange = Convert.ToSingle(Console.ReadLine());
+                    if (userRubWalletBalance < moneyAmountToExchange)
+                    {
+                        Console.Clear();
+                        Console.WriteLine($"На счету {CurrencyRubName} недостаточно средств для списания {moneyAmountToExchange}");
+                        Console.WriteLine();
+                        continue;
+                    }
+                    userRubWalletBalance -= moneyAmountToExchange;
+                    userEurWalletBalance += moneyAmountToExchange * RubToEurExchangeRate;
                     break;
- 
+                
                 case CommandEurToRubExchange:
-                    walletToWithdrawBalance = userEurWalletBalance;
-                    currencyToWihdrawName = CurrencyEurName;
                     Console.WriteLine(ExchangePromptFormatMessage, CurrencyEurName, CurrencyRubName);
+                    Console.Write("> ");
+                    moneyAmountToExchange = Convert.ToSingle(Console.ReadLine());
+                    if (userEurWalletBalance < moneyAmountToExchange)
+                    {
+                        Console.Clear();
+                        Console.WriteLine($"На счету {CurrencyEurName} недостаточно средств для списания {moneyAmountToExchange}");
+                        Console.WriteLine();
+                        continue;
+                    }
+                    userEurWalletBalance -= moneyAmountToExchange;
+                    userRubWalletBalance += moneyAmountToExchange * EurToRubExchangeRate;
                     break;
- 
+                
                 case CommandUsdToEurExchange:
-                    walletToWithdrawBalance = userUsdWalletBalance;
-                    currencyToWihdrawName = CurrencyUsdName;
                     Console.WriteLine(ExchangePromptFormatMessage, CurrencyUsdName, CurrencyEurName);
+                    Console.Write("> ");
+                    moneyAmountToExchange = Convert.ToSingle(Console.ReadLine());
+                    if (userUsdWalletBalance < moneyAmountToExchange)
+                    {
+                        Console.Clear();
+                        Console.WriteLine($"На счету {CurrencyUsdName} недостаточно средств для списания {moneyAmountToExchange}");
+                        Console.WriteLine();
+                        continue;
+                    }
+                    userUsdWalletBalance -= moneyAmountToExchange;
+                    userEurWalletBalance += moneyAmountToExchange * UsdToEurExchangeRate;
                     break;
- 
+                
                 case CommandEurToUsdExchange:
-                    walletToWithdrawBalance = userEurWalletBalance;
-                    currencyToWihdrawName = CurrencyEurName;
                     Console.WriteLine(ExchangePromptFormatMessage, CurrencyEurName, CurrencyUsdName);
+                    Console.Write("> ");
+                    moneyAmountToExchange = Convert.ToSingle(Console.ReadLine());
+                    if (userEurWalletBalance < moneyAmountToExchange)
+                    {
+                        Console.Clear();
+                        Console.WriteLine($"На счету {CurrencyEurName} недостаточно средств для списания {moneyAmountToExchange}");
+                        Console.WriteLine();
+                        continue;
+                    }
+                    userEurWalletBalance -= moneyAmountToExchange;
+                    userUsdWalletBalance += moneyAmountToExchange * EurToUsdExchangeRate;
                     break;
                 
                 case CommandExit:
@@ -99,51 +151,8 @@ class Program
                 default:
                     Console.Clear();
                     Console.WriteLine($"Недопустимый номер операции \"{userCommand}\"");
-                    Console.WriteLine("");
+                    Console.WriteLine();
                     continue;
-            }
-            
-            Console.Write("> ");
-            moneyAmountToExchange = Convert.ToSingle(Console.ReadLine());
-            if (walletToWithdrawBalance < moneyAmountToExchange)
-            {
-                Console.Clear();
-                Console.WriteLine($"На счету {currencyToWihdrawName} недостаточно средств для списания {moneyAmountToExchange}");
-                Console.WriteLine();
-                continue;
-            }
-            
-            switch (userCommand)
-            {
-                case CommandRubToUsdExchange:
-                    userRubWalletBalance -= moneyAmountToExchange;
-                    userUsdWalletBalance += moneyAmountToExchange * RubToUsdExchangeRate;
-                    break;
-                
-                case CommandUsdToRubExchange:
-                    userUsdWalletBalance -= moneyAmountToExchange;
-                    userRubWalletBalance += moneyAmountToExchange * UsdToRubExchangeRate;
-                    break;
-                
-                case CommandRubToEurExchange:
-                    userRubWalletBalance -= moneyAmountToExchange;
-                    userEurWalletBalance += moneyAmountToExchange * RubToEurExchangeRate;
-                    break;
-                
-                case CommandEurToRubExchange:
-                    userEurWalletBalance -= moneyAmountToExchange;
-                    userRubWalletBalance += moneyAmountToExchange * EurToRubExchangeRate;
-                    break;
-                
-                case CommandUsdToEurExchange:
-                    userUsdWalletBalance -= moneyAmountToExchange;
-                    userEurWalletBalance += moneyAmountToExchange * UsdToEurExchangeRate;
-                    break;
-                
-                case CommandEurToUsdExchange:
-                    userEurWalletBalance -= moneyAmountToExchange;
-                    userUsdWalletBalance += moneyAmountToExchange * EurToUsdExchangeRate;
-                    break;
             }
             
             Console.Clear();
