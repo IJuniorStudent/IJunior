@@ -19,6 +19,6 @@ class Program
         }
         
         Console.WriteLine($"Случайное число: {number}");
-        Console.WriteLine($"Сумма положительных чисел, кратных 3 или 5: {sum}");
+        Console.WriteLine($"Сумма положительных чисел, кратных {firstFactor} или {secondFactor}: {sum}");
     }
 }
