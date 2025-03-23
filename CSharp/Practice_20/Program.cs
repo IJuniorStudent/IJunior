@@ -7,6 +7,9 @@ class Program
         int arrayLength = 30;
         int arrayMinValue = 0;
         int arrayMaxValue = 20;
+ 
+        int firstElementIndex = 0;
+        int lastElementIndex = arrayLength - 1;
         
         int[] array = new int[arrayLength];
         Random random = new Random();
@@ -22,22 +25,16 @@ class Program
         Console.WriteLine();
         Console.WriteLine();
         
-        for (int i = 0; i < arrayLength; i++)
+        if (array[firstElementIndex] > array[firstElementIndex + 1])
+            Console.WriteLine($"Найден локальный максимум под номером {firstElementIndex + 1} - [{array[firstElementIndex]}] {array[firstElementIndex + 1]} ...");
+            
+        for (int i = 1; i < arrayLength - 1; i++)
         {
-            bool isGreaterThanPrev = i == 0 || array[i] > array[i - 1];
-            bool isGreaterThanNext = i == arrayLength - 1 || array[i] > array[i + 1];
-            
-            if (isGreaterThanPrev == false || isGreaterThanNext == false)
-                continue;
-            
-            Console.Write($"Найден локальный максимум под номером {i + 1} - ");
-            
-            if (i == 0)
-                Console.WriteLine($"[{array[i]}] {array[i + 1]} ...");
-            else if (i == arrayLength - 1)
-                Console.WriteLine($"... {array[i - 1]} [{array[i]}]");
-            else
-                Console.WriteLine($"... {array[i - 1]} [{array[i]}] {array[i + 1]} ...");
+            if (array[i] > array[i - 1] && array[i] > array[i + 1])
+                Console.WriteLine($"Найден локальный максимум под номером {i + 1} - ... {array[i - 1]} [{array[i]}] {array[i + 1]} ...");
         }
+        
+        if (array[lastElementIndex] > array[lastElementIndex - 1])
+            Console.WriteLine($"Найден локальный максимум под номером {lastElementIndex + 1} - ... {array[lastElementIndex - 1]} [{array[lastElementIndex]}]");
     }
 }
