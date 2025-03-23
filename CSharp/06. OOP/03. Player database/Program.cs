@@ -25,30 +25,30 @@ class Program
             Console.WriteLine($"{CommandExit}. Выход");
             Console.WriteLine();
             
-            string userInput = ReadUserInput("Введите номер команды");
+            string userInput = Utils.ReadUserInput("Введите номер команды");
             
             Console.Clear();
             
             switch (userInput)
             {
                 case CommandListPlayers:
-                    PrintPlayersList(database);
+                    DatabaseUtils.PrintPlayersList(database);
                     break;
                 
                 case CommandAddPlayer:
-                    AddPlayer(database);
+                    DatabaseUtils.AddPlayer(database);
                     break;
                 
                 case CommandBanPlayer:
-                    BanPlayer(database);
+                    DatabaseUtils.BanPlayer(database);
                     break;
                 
                 case CommandUnbanPlayer:
-                    UnbanPlayer(database);
+                    DatabaseUtils.UnbanPlayer(database);
                     break;
                 
                 case CommandRemovePlayer:
-                    RemovePlayer(database);
+                    DatabaseUtils.RemovePlayer(database);
                     break;
                 
                 case CommandExit:
@@ -56,80 +56,95 @@ class Program
                     break;
                 
                 default:
-                    PrintWaitMessage("Введена неизвестная команда!");
+                    Utils.PrintWaitMessage("Введена неизвестная команда!");
                     break;
             }
         }
     }
-    
-    static void PrintPlayersList(Database database)
+}
+
+class DatabaseUtils
+{
+    public static void PrintPlayersList(Database database)
     {
         database.PrintPlayers();
         
-        WaitAnyKeyPress();
+        Utils.WaitAnyKeyPress();
     }
     
-    static void AddPlayer(Database database)
+    public static void AddPlayer(Database database)
     {
-        string nickName = ReadUserInput("Введите ник персонажа");
+        string nickName = Utils.ReadUserInput("Введите ник персонажа");
         
-        if (TryReadNumberInput("Введите уровень персонажа", out int level) == false)
+        if (Utils.TryReadNumberInput("Введите уровень персонажа", out int level) == false)
             return;
         
-        database.AddNewPlayer(nickName, level);
+        database.AddPlayer(nickName, level);
         
-        PrintWaitMessage($"Игрок с ником \"{nickName}\" и уровнем {level} добавлен в базу данных!");
+        Utils.PrintWaitMessage($"Игрок с ником \"{nickName}\" и уровнем {level} добавлен в базу данных!");
     }
     
-    static void BanPlayer(Database database)
+    public static void BanPlayer(Database database)
     {
         database.PrintPlayers();
         
-        if (TryReadNumberInput("Введите ID игрока, чтобы забанить", out int playerId) == false)
+        if (Utils.TryReadNumberInput("Введите ID игрока, чтобы забанить", out int playerId) == false)
             return;
         
-        if (database.TryBanPlayer(playerId) == false)
+        if (TryGetPlayer(database, playerId, out Player? player) == false)
+            return;
+        
+        player.Ban();
+        
+        Utils.PrintWaitMessage($"Игрок с ID {playerId} успешно забанен");
+    }
+    
+    public static void UnbanPlayer(Database database)
+    {
+        database.PrintPlayers();
+        
+        if (Utils.TryReadNumberInput("Введите ID игрока, чтобы разбанить", out int playerId) == false)
+            return;
+        
+        if (TryGetPlayer(database, playerId, out Player? player) == false)
+            return;
+        
+        player.Unban();
+        
+        Utils.PrintWaitMessage($"Игрок с ID {playerId} успешно разбанен");
+    }
+    
+    public static void RemovePlayer(Database database)
+    {
+        database.PrintPlayers();
+        
+        if (Utils.TryReadNumberInput("Введите ID игрока, чтобы удалить", out int playerId) == false)
+            return;
+        
+        if (database.RemovePlayer(playerId) == false)
         {
-            PrintWaitMessage($"Игрок с ID {playerId} не найден в базе данных");
+            Utils.PrintWaitMessage($"Игрок с ID {playerId} не найден в базе данных");
             return;
         }
         
-        PrintWaitMessage($"Игрок с ID {playerId} успешно забанен");
+        Utils.PrintWaitMessage($"Игрок с ID {playerId} успешно удален");
     }
     
-    static void UnbanPlayer(Database database)
+    private static bool TryGetPlayer(Database database, int playerId, out Player? player)
     {
-        database.PrintPlayers();
-        
-        if (TryReadNumberInput("Введите ID игрока, чтобы разбанить", out int playerId) == false)
-            return;
-        
-        if (database.TryUnbanPlayer(playerId) == false)
+        if (database.TryGetPlayer(playerId, out player) == false)
         {
-            PrintWaitMessage($"Игрок с ID {playerId} не найден в базе данных");
-            return;
+            Console.WriteLine($"Игрок с ID {playerId} не найден в базе данных");
+            return false;
         }
         
-        PrintWaitMessage($"Игрок с ID {playerId} успешно разбанен");
+        return true;
     }
-    
-    static void RemovePlayer(Database database)
-    {
-        database.PrintPlayers();
-        
-        if (TryReadNumberInput("Введите ID игрока, чтобы удалить", out int playerId) == false)
-            return;
-        
-        if (database.TryRemovePlayer(playerId) == false)
-        {
-            PrintWaitMessage($"Игрок с ID {playerId} не найден в базе данных");
-            return;
-        }
-        
-        PrintWaitMessage($"Игрок с ID {playerId} успешно удален");
-    }
-    
-    static string ReadUserInput(string promptMessage)
+}
+ 
+class Utils
+{
+    public static string ReadUserInput(string promptMessage)
     {
         Console.WriteLine(promptMessage);
         Console.Write("> ");
@@ -137,7 +152,7 @@ class Program
         return Console.ReadLine();
     }
     
-    static bool TryReadNumberInput(string promptMessage, out int number)
+    public static bool TryReadNumberInput(string promptMessage, out int number)
     {
         if (int.TryParse(ReadUserInput(promptMessage), out number) == false)
         {
@@ -148,13 +163,14 @@ class Program
         return true;
     }
     
-    static void PrintWaitMessage(string message)
+    public static void PrintWaitMessage(string message)
     {
         Console.WriteLine(message);
+        
         WaitAnyKeyPress();
     }
     
-    static void WaitAnyKeyPress()
+    public static void WaitAnyKeyPress()
     {
         Console.WriteLine("Нажмите любую клавишу для продолжения...");
         Console.ReadKey(true);
@@ -163,45 +179,28 @@ class Program
 
 class Database
 {
-    private int _idCounter;
+    private int _playerIdCounter;
     private Dictionary<int, Player> _players;
     
     public Database()
     {
-        _idCounter = 1;
+        _playerIdCounter = 1;
         _players = new Dictionary<int, Player>();
     }
     
-    public void AddNewPlayer(string nick, int level)
+    public void AddPlayer(string nick, int level)
     {
-        _players.Add(_idCounter, new Player(_idCounter++, nick, level));
+        _players.Add(_playerIdCounter, new Player(_playerIdCounter++, nick, level));
     }
     
-    public bool TryRemovePlayer(int playerId)
+    public bool TryGetPlayer(int playerId, out Player? player)
     {
-        if (HasPlayer(playerId) == false)
-            return false;
-        
-        _players.Remove(playerId);
-        return true;
+        return _players.TryGetValue(playerId, out player);
     }
     
-    public bool TryBanPlayer(int playerId)
+    public bool RemovePlayer(int playerId)
     {
-        if (HasPlayer(playerId) == false)
-            return false;
-        
-        _players[playerId].Ban();
-        return true;
-    }
-    
-    public bool TryUnbanPlayer(int playerId)
-    {
-        if (HasPlayer(playerId) == false)
-            return false;
-        
-        _players[playerId].Unban();
-        return true;
+        return _players.Remove(playerId);
     }
     
     public void PrintPlayers()
@@ -215,24 +214,19 @@ class Database
         foreach (var player in _players)
             player.Value.Print();
     }
-    
-    private bool HasPlayer(int playerId)
-    {
-        return _players.ContainsKey(playerId);
-    }
 }
 
 class Player
 {
     public Player(int id, string nick, int level)
     {
-        ID = id;
+        Id = id;
         Nickname = nick;
         Level = level;
         IsBanned = false;
     }
     
-    public int ID { get; private set; }
+    public int Id { get; private set; }
     public string Nickname { get; private set; }
     public int Level { get; private set; }
     public bool IsBanned { get; private set; }
@@ -244,7 +238,7 @@ class Player
         if (IsBanned)
             banState = " (забанен)";
         
-        Console.WriteLine($"[{ID}] {Nickname} - уровень: {Level}{banState}");
+        Console.WriteLine($"[{Id}] {Nickname} - уровень: {Level}{banState}");
     }
     
     public void Ban()
