@@ -25,6 +25,7 @@ class Program
             Console.WriteLine($"{CommandExit}. Выход");
             Console.WriteLine();
             
+            DatabaseHandler handler = new DatabaseHandler(database);
             string userInput = Utils.ReadUserInput("Введите номер команды");
             
             Console.Clear();
@@ -32,23 +33,23 @@ class Program
             switch (userInput)
             {
                 case CommandListPlayers:
-                    DatabaseUtils.PrintPlayersList(database);
+                    handler.PrintPlayersList();
                     break;
                 
                 case CommandAddPlayer:
-                    DatabaseUtils.AddPlayer(database);
+                    handler.AddPlayer();
                     break;
                 
                 case CommandBanPlayer:
-                    DatabaseUtils.BanPlayer(database);
+                    handler.BanPlayer();
                     break;
                 
                 case CommandUnbanPlayer:
-                    DatabaseUtils.UnbanPlayer(database);
+                    handler.UnbanPlayer();
                     break;
                 
                 case CommandRemovePlayer:
-                    DatabaseUtils.RemovePlayer(database);
+                    handler.RemovePlayer();
                     break;
                 
                 case CommandExit:
@@ -63,65 +64,66 @@ class Program
     }
 }
 
-class DatabaseUtils
+class DatabaseHandler
 {
-    public static void PrintPlayersList(Database database)
+    private Database _database;
+    
+    public DatabaseHandler(Database database)
     {
-        database.PrintPlayers();
+        _database = database;
+    }
+    
+    public void PrintPlayersList()
+    {
+        _database.PrintPlayers();
         
         Utils.WaitAnyKeyPress();
     }
     
-    public static void AddPlayer(Database database)
+    public void AddPlayer()
     {
         string nickName = Utils.ReadUserInput("Введите ник персонажа");
         
         if (Utils.TryReadNumberInput("Введите уровень персонажа", out int level) == false)
             return;
         
-        database.AddPlayer(nickName, level);
+        _database.AddPlayer(nickName, level);
         
         Utils.PrintWaitMessage($"Игрок с ником \"{nickName}\" и уровнем {level} добавлен в базу данных!");
     }
     
-    public static void BanPlayer(Database database)
+    public void BanPlayer()
     {
-        database.PrintPlayers();
+        _database.PrintPlayers();
         
-        if (Utils.TryReadNumberInput("Введите ID игрока, чтобы забанить", out int playerId) == false)
-            return;
-        
-        if (TryGetPlayer(database, playerId, out Player? player) == false)
+        if (TryGetPlayerFromInput("Введите ID игрока, чтобы забанить", out Player? player) == false)
             return;
         
         player.Ban();
         
-        Utils.PrintWaitMessage($"Игрок с ID {playerId} успешно забанен");
+        Utils.PrintWaitMessage($"Игрок с ID {player.Id} успешно забанен");
     }
     
-    public static void UnbanPlayer(Database database)
+    public void UnbanPlayer()
     {
-        database.PrintPlayers();
+        _database.PrintPlayers();
         
-        if (Utils.TryReadNumberInput("Введите ID игрока, чтобы разбанить", out int playerId) == false)
-            return;
-        
-        if (TryGetPlayer(database, playerId, out Player? player) == false)
+        if (TryGetPlayerFromInput("Введите ID игрока, чтобы разбанить", out Player? player) == false)
             return;
         
         player.Unban();
         
-        Utils.PrintWaitMessage($"Игрок с ID {playerId} успешно разбанен");
+        Utils.PrintWaitMessage($"Игрок с ID {player.Id} успешно разбанен");
     }
     
-    public static void RemovePlayer(Database database)
+    public void RemovePlayer()
     {
-        database.PrintPlayers();
+        _database.PrintPlayers();
         
         if (Utils.TryReadNumberInput("Введите ID игрока, чтобы удалить", out int playerId) == false)
             return;
         
-        if (database.RemovePlayer(playerId) == false)
+        if (_database.RemovePlayer(playerId) == false)
         {
             Utils.PrintWaitMessage($"Игрок с ID {playerId} не найден в базе данных");
             return;
@@ -130,9 +132,14 @@ class DatabaseUtils
         Utils.PrintWaitMessage($"Игрок с ID {playerId} успешно удален");
     }
     
-    private static bool TryGetPlayer(Database database, int playerId, out Player? player)
+    private bool TryGetPlayerFromInput(string promptMessage, out Player? player)
     {
-        if (database.TryGetPlayer(playerId, out player) == false)
+        player = null;
+        
+        if (Utils.TryReadNumberInput(promptMessage, out int playerId) == false)
+            return false;
+        
+        if (_database.TryGetPlayer(playerId, out player) == false)
         {
             Console.WriteLine($"Игрок с ID {playerId} не найден в базе данных");
             return false;
