@@ -4,30 +4,26 @@ class Program
 {
     static void Main(string[] args)
     {
-        List<string> firstList = ["1", "2", "1"];
-        List<string> secondList = ["3", "2"];
+        string[] firstValues = ["1", "2", "1"];
+        string[] secondValues = ["3", "2"];
         
-        List<string> uniqueValueList = MergeUniqueValues([firstList, secondList]);
+        List<string> uniqueValues = new List<string>();
         
-        PrintList(uniqueValueList);
+        AppendUniqueValues(uniqueValues, firstValues);
+        AppendUniqueValues(uniqueValues, secondValues);
+        
+        PrintList(uniqueValues);
     }
     
-    static List<string> MergeUniqueValues(List<List<string>> sourceLists)
+    static void AppendUniqueValues(List<string> targetList, string[] sourceValues)
     {
-        var mergedList = new List<string>();
-        
-        foreach (var sourceList in sourceLists)
+        foreach (string value in sourceValues)
         {
-            foreach (var value in sourceList)
-            {
-                if (mergedList.Contains(value))
-                    continue;
-                
-                mergedList.Add(value);
-            }
+            if (targetList.Contains(value))
+                continue;
+            
+            targetList.Add(value);
         }
-        
-        return mergedList;
     }
     
     static void PrintList(List<string> list)
