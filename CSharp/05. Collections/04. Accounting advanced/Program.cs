@@ -31,7 +31,7 @@ class Program
                     break;
                 
                 case CommandRemoveEmployee:
-                    RemoveEmployees(employeeDatabase);
+                    RemoveEmployeeJob(employeeDatabase);
                     break;
                 
                 case CommandDisplayEmploeeList:
@@ -69,32 +69,46 @@ class Program
         
         database[jobName].Add(FormatEmployeeName(firstName, lastName));
     }
-    
-    static void RemoveEmployees(Dictionary<string, List<string>> database)
+ 
+    static void RemoveEmployeeJob(Dictionary<string, List<string>> database)
     {
         Console.Clear();
+        
+        if (database.Count == 0)
+        {
+            DisplayWaitMessage("В базе данных нет ни одного сотрудника");
+            return;
+        }
+        
         Console.WriteLine("Удаление сотрудника");
         Console.WriteLine();
         
-        string firstName = ReadUserInput("Введите имя");
-        string lastName = ReadUserInput("Введите фамилию");
-        
-        string fullName = FormatEmployeeName(firstName, lastName);
         List<string> jobNames = database.Keys.ToList();
-        int removedCount = 0;
         
-        foreach (var jobName in jobNames)
+        if (AskSelectListIndex("Введите номер должности, для снятия сотрудника", jobNames, out int jobIndex) == false)
         {
-            removedCount += database[jobName].RemoveAll(element => element == fullName);
-            
-            if (database[jobName].Count == 0)
-                database.Remove(jobName);
+            DisplayWaitMessage("Должность с таким номером отсутствует в базе данных");
+            return;
         }
         
-        if (removedCount > 0)
-            DisplayWaitMessage($"Удалено {removedCount} сотрудников с именем \"{fullName}\"");
-        else
-            DisplayWaitMessage($"Сотрудники с именем \"{fullName}\" не найдены");
+        Console.WriteLine();
+        
+        string jobName = jobNames[jobIndex];
+        List<string> employeeList = database[jobName];
+        
+        if (AskSelectListIndex("Введите номер сотрудника для снятия с должности", employeeList, out int employeeIndex) == false)
+        {
+            DisplayWaitMessage("Сотрудник с таким номером не занимает выбранную должность");
+            return;
+        }
+        
+        string employeeName = employeeList[employeeIndex];
+        employeeList.RemoveAt(employeeIndex);
+        
+        if (employeeList.Count == 0)
+            database.Remove(jobName);
+        
+        DisplayWaitMessage($"Сотрудник \"{employeeName}\" снят с должности \"{jobName}\"");
     }
     
     static void DisplayEmployeeList(Dictionary<string, List<string>> database)
@@ -109,7 +123,7 @@ class Program
         
         Console.WriteLine("Список должностей и сотрудников:");
         Console.WriteLine();
- 
+        
         foreach (var job in database)
         {
             Console.WriteLine(job.Key);
@@ -122,6 +136,16 @@ class Program
         
         WaitAnyKeyPress();
     }
+ 
+    static bool AskSelectListIndex(string promptMessage, List<string> list, out int selectedIndex)
+    {
+        DisplayNumberedList(list);
+ 
+        int userNumber = ReadNumberInput(promptMessage);
+        selectedIndex = userNumber - 1;
+        
+        return selectedIndex >= 0 && selectedIndex < list.Count;
+    }
     
     static string ReadUserInput(string promptMessage)
     {
@@ -131,6 +155,22 @@ class Program
         return Console.ReadLine();
     }
     
+    static int ReadNumberInput(string promptMessage)
+    {
+        int number;
+        
+        while (int.TryParse(ReadUserInput(promptMessage), out number) == false)
+            DisplayWaitMessage("Число введено некорректно");
+        
+        return number;
+    }
+ 
+    static void DisplayNumberedList(List<string> list)
+    {
+        for (int i = 0; i < list.Count; i++)
+            Console.WriteLine($"{i + 1}. {list[i]}");
+    }
+ 
     static void DisplayWaitMessage(string message)
     {
         Console.WriteLine(message);
