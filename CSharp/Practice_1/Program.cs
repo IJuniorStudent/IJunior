@@ -4,31 +4,18 @@ class Program
 {
     static void Main(string[] args)
     {
-        byte byteValueUnit, byteValueZero;
-        byteValueUnit = 1;
-        byteValueZero = 0;
- 
-        ushort unsignedShortValueMax;
-        unsignedShortValueMax = ushort.MaxValue;
- 
-        short shortValueNegative;
-        shortValueNegative = -359;
- 
-        float floatValueSinglePrecision;
-        floatValueSinglePrecision = 0.123456f;
- 
-        double floatValueDoublePrecision;
-        floatValueDoublePrecision = 0.123456789;
- 
-        char singleCharValue;
-        singleCharValue = 'X';
- 
-        string stringValue;
-        stringValue = "here is a string. Hello!";
- 
-        bool boolValue;
-        boolValue = true;
- 
-        bool isUnitLessThanZero = byteValueUnit < byteValueZero;
+        byte difficultyLevel = 1;
+        
+        int enemyHealth = 250;
+        int enemyDamagePerHit = 15;
+        float enemyMoveSpeed = 1.0f;
+        float enemyViewDistance = 30.0f;
+        
+        int playerHealth = 100;
+        int playerDamagePerHit = 10;
+        float playerMoveSpeed = 1.5f;
+        bool isPlayerAlive = true;
+        
+        string playerDieMessage = "Better luck next time!";
     }
 }
