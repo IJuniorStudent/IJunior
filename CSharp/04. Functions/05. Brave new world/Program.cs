@@ -2,12 +2,12 @@
 
 class Program
 {
-    const char WallSymbol = '#';
-    const char PlayerSymbol = '@';
-    
     static void Main(string[] args)
     {
         Console.CursorVisible = false;
+        
+        char obstacleSymbol = '#';
+        char playerSymbol = '@';
         
         int gameFieldStartX = 0;
         int gameFieldStartY = 0;
@@ -26,14 +26,16 @@ class Program
             Console.Clear();
             
             DrawGameMap(mapDrawPosition, gameMap);
-            DrawPlayerMark(playerPosition);
+            DrawPlayerMark(playerPosition, playerSymbol);
             
             ConsoleKey userInputKey = Console.ReadKey().Key;
             
-            if (HandleMovementInput(userInputKey, out int[] moveDirection))
-                TryMovePlayer(gameMap, moveDirection, playerPosition);
+            int[] moveDirection = GetMoveDirection(userInputKey);
             
-            if (HandleExitInput(userInputKey))
+            if (CanPlayerMove(gameMap, playerPosition, moveDirection, obstacleSymbol))
+                MovePlayer(playerPosition, moveDirection);
+                
+            if (IsExitPressed(userInputKey))
                 isGameRunning = false;
         }
         
@@ -42,50 +44,53 @@ class Program
         Console.WriteLine("Bye bye!");
     }
     
-    static bool HandleMovementInput(ConsoleKey pressedKey, out int[] moveDirection)
+    static int[] GetMoveDirection(ConsoleKey pressedKey)
     {
-        moveDirection = [0, 0];
+        const ConsoleKey CommandMoveUp = ConsoleKey.UpArrow;
+        const ConsoleKey CommandMoveDown = ConsoleKey.DownArrow;
+        const ConsoleKey CommandMoveLeft = ConsoleKey.LeftArrow;
+        const ConsoleKey CommandMoveRight = ConsoleKey.RightArrow;
         
-        bool isHandled = true;
+        int[] moveDirection = [0, 0];
         
         switch (pressedKey)
         {
-            case ConsoleKey.UpArrow:
+            case CommandMoveUp:
                 moveDirection[1] = -1;
                 break;
             
-            case ConsoleKey.DownArrow:
+            case CommandMoveDown:
                 moveDirection[1] = 1;
                 break;
             
-            case ConsoleKey.LeftArrow:
+            case CommandMoveLeft:
                 moveDirection[0] = -1;
                 break;
             
-            case ConsoleKey.RightArrow:
+            case CommandMoveRight:
                 moveDirection[0] = 1;
-                break;
-            
-            default:
-                isHandled = false;
                 break;
         }
         
-        return isHandled;
+        return moveDirection;
     }
     
-    static bool HandleExitInput(ConsoleKey pressedKey)
+    static bool CanPlayerMove(char[,] gameMap, int[] position, int[] direction, char obstacleSymbol)
     {
-        return pressedKey == ConsoleKey.Escape;
+        return gameMap[position[1] + direction[1], position[0] + direction[0]] != obstacleSymbol;
     }
     
-    static void TryMovePlayer(char[,] gameMap, int[] moveDirection, int[] playerPosition)
+    static void MovePlayer(int[] position, int[] direction)
     {
-        if (gameMap[playerPosition[1] + moveDirection[1], playerPosition[0] + moveDirection[0]] == WallSymbol)
-            return;
+        position[0] += direction[0];
+        position[1] += direction[1];
+    }
+    
+    static bool IsExitPressed(ConsoleKey pressedKey)
+    {
+        const ConsoleKey CommandExit = ConsoleKey.Escape;
         
-        playerPosition[0] += moveDirection[0];
-        playerPosition[1] += moveDirection[1];
+        return pressedKey == CommandExit;
     }
     
     static void DrawGameMap(int[] drawPosition, char[,] gameMap)
@@ -101,10 +106,10 @@ class Program
         }
     }
     
-    static void DrawPlayerMark(int[] playerPosition)
+    static void DrawPlayerMark(int[] playerPosition, char playerSymbol)
     {
         Console.SetCursorPosition(playerPosition[0], playerPosition[1]);
-        Console.Write(PlayerSymbol);
+        Console.Write(playerSymbol);
     }
     
     static char[,] LoadGameMap()
@@ -151,4 +156,3 @@ class Program
         return length;
     }
 }
- 
