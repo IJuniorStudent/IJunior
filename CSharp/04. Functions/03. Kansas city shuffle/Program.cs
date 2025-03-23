@@ -8,24 +8,22 @@ class Program
         
         int[] numbers = InitNumberSequence(arrayLength);
         
-        Console.WriteLine($"Исходный массив чисел:\n{ArrayToString(numbers)}\n");
-        
-        Shuffle(ref numbers);
-        
-        Console.WriteLine($"Перемешанный массив:\n{ArrayToString(numbers)}\n");
+        PrintArray("Исходный массив чисел", numbers);
+        Shuffle(numbers);
+        PrintArray("Перемешанный массив", numbers);
     }
  
     static int[] InitNumberSequence(int sequenceLength)
     {
-        int[] result = new int[sequenceLength];
+        int[] numbers = new int[sequenceLength];
         
         for (int i = 0; i < sequenceLength; i++)
-            result[i] = i + 1;
+            numbers[i] = i + 1;
         
-        return result;
+        return numbers;
     }
  
-    static void Shuffle(ref int[] numbers)
+    static void Shuffle(int[] numbers)
     {
         int arrayLength = numbers.Length;
         Random random = new Random();
@@ -44,13 +42,13 @@ class Program
         (firstValue, secondValue) = (secondValue, firstValue);
     }
     
-    static string ArrayToString(int[] numbers)
+    static void PrintArray(string headMessage, int[] numbers)
     {
-        string result = "";
+        Console.WriteLine(headMessage);
         
-        foreach (int value in numbers)
-            result += $"{value} ";
+        for (int i = 0; i < numbers.Length; i++)
+            Console.Write($"{numbers[i]} ");
         
-        return result;
+        Console.WriteLine();
     }
 }
