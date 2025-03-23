@@ -5,14 +5,14 @@ class Program
     static void Main(string[] args)
     {
         Console.Write("Введите сообщение: ");
-        string displayMessage = Console.ReadLine();
+        string messageText = Console.ReadLine();
         
-        Console.Write("Введите количество повторов сообщения: ");
-        int repeatCount = Convert.ToInt32(Console.ReadLine());
+        Console.Write("Введите количество показов сообщения: ");
+        int messageDisplayTimes = Convert.ToInt32(Console.ReadLine());
         
-        while (repeatCount-- > 0)
+        for (int i = 0; i < messageDisplayTimes; i++)
         {
-            Console.WriteLine($"Сообщение: {displayMessage}");
+            Console.WriteLine(messageText);
         }
         
         Console.ReadKey();
