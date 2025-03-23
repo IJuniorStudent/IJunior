@@ -4,21 +4,22 @@ class Program
 {
     static void Main(string[] args)
     {
-        int currentHealth = 4;
-        int maxHealth = 10;
+        float currentHealthPercent = 75;
+        int healthBarLength = 20;
         int healthBarPositionX = 0;
         int healthBarPositionY = 0;
         
-        DrawProgressBar("Health", GenerateProgressBar(currentHealth, maxHealth), healthBarPositionX, healthBarPositionY);
+        DrawProgressBar("Health", GenerateProgressBar(currentHealthPercent, healthBarLength), healthBarPositionX, healthBarPositionY);
     }
     
-    static string GenerateProgressBar(int filledLength, int totalLength, char fillChar = '#', char backChar = '_')
+    static string GenerateProgressBar(float barFillPercent, int barLength, char fillChar = '#', char backChar = '_')
     {
         string progressBar = "";
+        int fillLength = (int)(barLength * barFillPercent / 100.0f);
         
-        for (int i = 0; i < totalLength; i++)
+        for (int i = 0; i < barLength; i++)
         {
-            char drawChar = i < filledLength ? fillChar : backChar;
+            char drawChar = i < fillLength ? fillChar : backChar;
             progressBar += drawChar;
         }
         
