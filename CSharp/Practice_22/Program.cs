@@ -5,60 +5,46 @@ class Program
     static void Main(string[] args)
     {
         int randValueMin = 1;
-        int randValueMax = 9;
-        
-        int valueRepeatTimesMin = 1;
-        int valueRepeatTimesMax = 10;
+        int randValueMax = 5;
         
         int arrayLength = 30;
-        int[] randomSequence = new int[arrayLength];
+        int[] numbers = new int[arrayLength];
         Random random = new Random();
         
         for (int i = 0; i < arrayLength; i++)
-        {
-            int repeatNumber = random.Next(randValueMin, randValueMax + 1);
-            int maxRepeatCount = random.Next(valueRepeatTimesMin, valueRepeatTimesMax + 1);
-            maxRepeatCount = Math.Min(maxRepeatCount, arrayLength - i);
-            
-            for (int j = i; j < i + maxRepeatCount; j++)
-                randomSequence[j] = repeatNumber;
-            
-            i += maxRepeatCount - 1;
-        }
+            numbers[i] = random.Next(randValueMin, randValueMax + 1);
         
         Console.WriteLine($"Исходная последовательность чисел:");
         
-        foreach (int value in randomSequence)
+        foreach (int value in numbers)
             Console.Write($"{value} ");
         
         Console.WriteLine("\n");
         
-        int watchValueIndex = 0;
-        int watchValue = randomSequence[watchValueIndex];
-        int watchValueRepeatTimes = 1;
+        int tempIndex = 0;
+        int tempRepeatTimes = 1;
         
-        int foundValueIndex = watchValueIndex;
-        int foundValue = watchValue;
-        int foundValueRepeatTimes = watchValueRepeatTimes;
+        int foundValueIndex = tempIndex;
+        int foundValue = numbers[tempIndex];
+        int foundValueRepeatTimes = tempRepeatTimes;
         
         for (int i = 1; i < arrayLength; i++)
         {
-            if (randomSequence[i] != watchValue)
+            if (numbers[i] != numbers[i - 1])
             {
-                watchValueRepeatTimes = 1;
-                watchValueIndex = i;
-                watchValue = randomSequence[i];
+                tempRepeatTimes = 1;
+                tempIndex = i;
             }
             else
             {
-                watchValueRepeatTimes++;
+                tempRepeatTimes++;
             }
             
-            if (watchValueRepeatTimes > foundValueRepeatTimes)
+            if (tempRepeatTimes > foundValueRepeatTimes)
             {
-                foundValueRepeatTimes = watchValueRepeatTimes;
-                foundValue = watchValue;
-                foundValueIndex = watchValueIndex;
+                foundValueRepeatTimes = tempRepeatTimes;
+                foundValueIndex = tempIndex;
+                foundValue = numbers[i - 1];
             }
         }
         
