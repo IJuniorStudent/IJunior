@@ -40,9 +40,7 @@ class Program
                     Console.WriteLine("Для продолжения нажмите любую клавишу...");
                     Console.ReadKey();
                     
-                    userInputNumbers = new int[0];
                     sumOfInputNumbers = 0;
-                    
                     break;
                 
                 case CommandExit:
@@ -61,7 +59,6 @@ class Program
                     
                     tempBuffer[userNumbersCount] = value;
                     userInputNumbers = tempBuffer;
-                    
                     break;
             }
         }
