@@ -18,7 +18,7 @@ class Program
         Console.WriteLine("\n");
         Console.Write("Введите количество сдвигов массива влево: ");
         
-        int shiftCount = Convert.ToInt32(Console.ReadLine());
+        int shiftCount = Convert.ToInt32(Console.ReadLine()) % arrayLength;
         
         for (int i = 0; i < shiftCount; i++)
         {
