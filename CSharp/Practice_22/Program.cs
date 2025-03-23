@@ -11,30 +11,30 @@ class Program
         int valueRepeatTimesMax = 10;
         
         int arrayLength = 30;
-        int[] array = new int[arrayLength];
+        int[] randomSequence = new int[arrayLength];
         Random random = new Random();
         
         for (int i = 0; i < arrayLength; i++)
         {
-            int randomNumber = random.Next(randValueMin, randValueMax + 1);
-            int valueRepeatCount = random.Next(valueRepeatTimesMin, valueRepeatTimesMax + 1);
-            valueRepeatCount = Math.Min(valueRepeatCount, arrayLength - i);
+            int repeatNumber = random.Next(randValueMin, randValueMax + 1);
+            int maxRepeatCount = random.Next(valueRepeatTimesMin, valueRepeatTimesMax + 1);
+            maxRepeatCount = Math.Min(maxRepeatCount, arrayLength - i);
             
-            for (int j = i; j < i + valueRepeatCount; j++)
-                array[j] = randomNumber;
+            for (int j = i; j < i + maxRepeatCount; j++)
+                randomSequence[j] = repeatNumber;
             
-            i += valueRepeatCount - 1;
+            i += maxRepeatCount - 1;
         }
         
         Console.WriteLine($"Исходная последовательность чисел:");
         
-        foreach (int value in array)
+        foreach (int value in randomSequence)
             Console.Write($"{value} ");
         
         Console.WriteLine("\n");
         
         int watchValueIndex = 0;
-        int watchValue = array[watchValueIndex];
+        int watchValue = randomSequence[watchValueIndex];
         int watchValueRepeatTimes = 1;
         
         int foundValueIndex = watchValueIndex;
@@ -43,29 +43,23 @@ class Program
         
         for (int i = 1; i < arrayLength; i++)
         {
-            if (array[i] != watchValue)
+            if (randomSequence[i] != watchValue)
             {
-                if (watchValueRepeatTimes > foundValueRepeatTimes)
-                {
-                    foundValueRepeatTimes = watchValueRepeatTimes;
-                    foundValue = watchValue;
-                    foundValueIndex = watchValueIndex;
-                }
                 watchValueRepeatTimes = 1;
                 watchValueIndex = i;
-                watchValue = array[i];
+                watchValue = randomSequence[i];
             }
             else
             {
                 watchValueRepeatTimes++;
             }
-        }
-        
-        if (watchValueRepeatTimes > foundValueRepeatTimes)
-        {
-            foundValueRepeatTimes = watchValueRepeatTimes;
-            foundValue = watchValue;
-            foundValueIndex = watchValueIndex;
+            
+            if (watchValueRepeatTimes > foundValueRepeatTimes)
+            {
+                foundValueRepeatTimes = watchValueRepeatTimes;
+                foundValue = watchValue;
+                foundValueIndex = watchValueIndex;
+            }
         }
         
         Console.WriteLine($"Наиболее повторяемое число: {foundValue}");
