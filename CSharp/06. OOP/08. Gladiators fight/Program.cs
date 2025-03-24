@@ -185,6 +185,9 @@ abstract class Warrior : IDamageable
 
 class TwinBlade : Warrior
 {
+    private int _abilityChanceMin = 0;
+    private int _abilityChanceMax = 100;
+    private int _abilityApplyChance = 30;
     private int _abilityAttackMultiplier = 2;
     
     public TwinBlade(int damage, int armor, int health) : base(damage, armor, health) { }
@@ -215,11 +218,7 @@ class TwinBlade : Warrior
     
     private int CalculateHitDamage(int damage)
     {
-        int abilityChanceMin = 0;
-        int abilityChanceMax = 100;
-        int abilityChance = 30;
-        
-        if (Utils.GetRandomNumber(abilityChanceMin, abilityChanceMax) >= abilityChance)
+        if (Utils.GetRandomNumber(_abilityChanceMin, _abilityChanceMax) >= _abilityApplyChance)
             return damage;
         
         Console.WriteLine($"{Profession} использует свою особенность и наносит x{_abilityAttackMultiplier} урона");
@@ -231,13 +230,13 @@ class TwinBlade : Warrior
 class Barbarian : Warrior
 {
     private int _attackNumberCounter = 0;
-    private int _abilityUsePerAttacks = 3;
+    private int _abilityApplyPerHitCount = 3;
     private int _abilityDamageMultiplier = 2;
     
     public Barbarian(int damage, int armor, int health) : base(damage, armor, health) { }
  
     public override string Profession => "Варвар";
-    public override string AbilityDescription => $"Каждую {_abilityUsePerAttacks} атаку наносит x{_abilityDamageMultiplier} урон";
+    public override string AbilityDescription => $"Каждую {_abilityApplyPerHitCount} атаку наносит x{_abilityDamageMultiplier} урон";
     
     public override Barbarian MakeCopy()
     {
@@ -262,7 +261,7 @@ class Barbarian : Warrior
     
     private int CalculateHitDamage(int damage)
     {
-        if (++_attackNumberCounter % _abilityUsePerAttacks != 0)
+        if (++_attackNumberCounter % _abilityApplyPerHitCount != 0)
             return damage;
         
         _attackNumberCounter = 0;
@@ -302,7 +301,7 @@ class Paladin : Warrior
     
     public override void TakeDamage(int damage)
     {
-        if (TryUseAbility())
+        if (TryApplyAbility())
             Heal();
         
         int incomeDamage = NormalizeDamage(damage);
@@ -311,7 +310,7 @@ class Paladin : Warrior
         DisplayDamageMessage(incomeDamage);
     }
     
-    private bool TryUseAbility()
+    private bool TryApplyAbility()
     {
         if (IsAlive == false)
             return false;
@@ -386,9 +385,9 @@ class Warlock : Warrior
 
 class Trickster : Warrior
 {
-    private int _useAbilityChanceRangeMin = 0;
-    private int _useAbilityChanceRangeMax = 100;
-    private int _useAbilityChance = 30;
+    private int _abilityChanceRangeMin = 0;
+    private int _abilityChanceRangeMax = 100;
+    private int _abilityApplyChance = 30;
     
     public Trickster(int damage, int armor, int health) : base(damage, armor, health) { }
     
@@ -410,6 +409,10 @@ class Trickster : Warrior
     public override void TakeDamage(int damage)
     {
         int incomeDamage = CalculateIncomeDamage(NormalizeDamage(damage));
+        
+        if (incomeDamage == 0)
+            return;
+        
         Health -= incomeDamage;
         
         DisplayDamageMessage(incomeDamage);
@@ -417,7 +420,7 @@ class Trickster : Warrior
     
     private int CalculateIncomeDamage(int damage)
     {
-        if (Utils.GetRandomNumber(_useAbilityChanceRangeMin, _useAbilityChanceRangeMax) >= _useAbilityChance)
+        if (Utils.GetRandomNumber(_abilityChanceRangeMin, _abilityChanceRangeMax) >= _abilityApplyChance)
             return damage;
         
         Console.WriteLine($"{Profession} уклоняется от удара");
