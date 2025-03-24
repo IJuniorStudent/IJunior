@@ -53,7 +53,9 @@ class Wagon
     
     public virtual int GetCapacity()
     {
-        return 40;
+        int defaultWagonCapacity = 40;
+        
+        return defaultWagonCapacity;
     }
     
     public void PlacePassengers(int passengersCount)
@@ -91,18 +93,13 @@ class Train
 {
     private List<Wagon> _wagons;
     
-    public Train(Route route)
+    public Train(Route route, List<Wagon> wagons)
     {
-        _wagons = new List<Wagon>();
         Route = route;
+        _wagons = wagons;
     }
     
     public Route Route { get; }
-    
-    public void AddWagon(Wagon wagon)
-    {
-        _wagons.Add(wagon);
-    }
     
     public string GetSummaryInfo()
     {
@@ -174,7 +171,7 @@ class Dispatcher
             return false;
         }
  
-        if (Utils.ConfirmUserInput($"Отправление \"{startCityName}\", прибытие: \"{targetCityName}\"") == false)
+        if (Utils.TryConfirmUserInput($"Отправление \"{startCityName}\", прибытие: \"{targetCityName}\"") == false)
             return false;
         
         route = new Route(startCityName, targetCityName);
@@ -190,26 +187,25 @@ class Dispatcher
         
         soldTicketsCount = _random.Next(ticketsMinCount, ticketsMaxCount + 1);
         
-        return Utils.ConfirmUserInput($"{soldTicketsCount} пассажиров приобрели билеты на поезд");
+        return Utils.TryConfirmUserInput($"{soldTicketsCount} пассажиров приобрели билеты на поезд");
     }
     
     private Train CreateTrain(Route route, int requiredPassengersCount)
     {
         Console.Clear();
         
-        Train train = new Train(route);
         int passengersToPlace = requiredPassengersCount;
+        List<Wagon> wagons = new List<Wagon>();
         
         while (passengersToPlace > 0)
         {
             Wagon wagon = new Wagon();
+            wagons.Add(wagon);
             
             passengersToPlace -= wagon.PlaceToCapacity(passengersToPlace);
-            
-            train.AddWagon(wagon);
         }
         
-        return train;
+        return new Train(route, wagons);
     }
     
     private bool ConfirmTrainConfiguration(Train train)
@@ -218,13 +214,13 @@ class Dispatcher
         Console.WriteLine($"Предварительная конфигурация: {train.GetSummaryInfo()}");
         Console.WriteLine();
         
-        return Utils.ConfirmUserInput("Все данные верны?");
+        return Utils.TryConfirmUserInput("Все данные верны?");
     }
 }
 
 class Utils
 {
-    public static bool ConfirmUserInput(string promptMessage)
+    public static bool TryConfirmUserInput(string promptMessage)
     {
         const string CommandConfirm = "+";
         
