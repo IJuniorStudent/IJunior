@@ -27,7 +27,7 @@ class Program
             switch (userInput)
             {
                 case CommandWatchBattle:
-                    arena.InitBattle();
+                    arena.PerformFight();
                     break;
                 
                 case CommandExit:
@@ -53,7 +53,7 @@ class BattleArena
         InitWarriors();
     }
     
-    public void InitBattle()
+    public void PerformFight()
     {
         ShowWarriors();
         
@@ -62,7 +62,7 @@ class BattleArena
         
         Console.Clear();
         
-        Warrior winner = StartBattle(firstWarrior, secondWarrior);
+        Warrior winner = Fight(firstWarrior, secondWarrior);
         
         Utils.PrintWaitMessage($"Бой окончен. Победитель: {winner.Profession}");
     }
@@ -87,7 +87,7 @@ class BattleArena
                TrySelectWarrior("Укажите номер второго бойца", out secondOrderWarrior);
     }
     
-    private Warrior StartBattle(Warrior firstWarriorTemplate, Warrior secondWarriorTemplate)
+    private Warrior Fight(Warrior firstWarriorTemplate, Warrior secondWarriorTemplate)
     {
         Warrior firstWarrior = firstWarriorTemplate.MakeCopy();
         Warrior secondWarrior = secondWarriorTemplate.MakeCopy();
@@ -140,29 +140,30 @@ interface IDamageable
     public void TakeDamage(int damage);
 }
 
-class Warrior : IDamageable
+abstract class Warrior : IDamageable
 {
-    public Warrior(int attackDamage, int armor, int health)
+    public Warrior(int damage, int armor, int health)
     {
-        AttackDamage = attackDamage;
+        Damage = damage;
         Armor = armor;
         Health = health;
         MaxHealth = health;
     }
     
-    public int AttackDamage { get; }
+    public int Damage { get; }
     public int Armor { get; }
     public int Health { get; protected set; }
     public int MaxHealth { get; }
-    
-    public string Profession => GetProfessionName();
     public bool IsAlive => Health > 0;
-    public string Summary => $"{GetProfessionName()} - урон: {AttackDamage}, защита: {Armor}, здоровье: {Health}. Особенность: {GetAbilityDescription()}";
+    public string Summary => $"{Profession} - урон: {Damage}, защита: {Armor}, здоровье: {Health}. Особенность: {Ability}";
+    
+    public abstract string Profession { get; }
+    public abstract string Ability { get; }
     
     public void Attack(IDamageable target)
     {
-        int attackDamage = GetAttackDamage();
-        Console.WriteLine($"{GetProfessionName()} наносит {attackDamage} урона");
+        int attackDamage = AdjustAttackDamage();
+        Console.WriteLine($"{Profession} наносит {attackDamage} урона");
         
         target.TakeDamage(attackDamage);
     }
@@ -174,47 +175,31 @@ class Warrior : IDamageable
         
         int minDamage = 0;
         
-        int adjustedDamage = Math.Min(AdjustIncomeDamage(damage), Health);
+        int adjustedDamage = AdjustIncomeDamage(damage);
         int normalizedDamage = Math.Max(adjustedDamage - Armor, minDamage);
         int totalDamage = Math.Min(normalizedDamage, Health);
  
         Health -= totalDamage;
         
         if (IsAlive)
-            Console.WriteLine($"{GetProfessionName()} получает {totalDamage} ед. урона. Здоровье: {Health}");
+            Console.WriteLine($"{Profession} получает {totalDamage} ед. урона. Здоровье: {Health}");
         else
-            Console.WriteLine($"{GetProfessionName()} получает {totalDamage} ед. урона и проигрывает бой");
+            Console.WriteLine($"{Profession} получает {totalDamage} ед. урона и проигрывает бой");
     }
     
-    public virtual Warrior MakeCopy()
-    {
-        throw new NotImplementedException();
-    }
+    public abstract Warrior MakeCopy();
     
-    protected virtual int GetAttackDamage()
+    protected virtual int AdjustAttackDamage()
     {
-        throw new NotImplementedException();
+        return Damage;
     }
     
     protected virtual int AdjustIncomeDamage(int damage)
     {
-        throw new NotImplementedException();
+        return damage;
     }
     
-    protected virtual bool TryUseAbility()
-    {
-        throw new NotImplementedException();
-    }
-    
-    protected virtual string GetProfessionName()
-    {
-        throw new NotImplementedException();
-    }
-    
-    protected virtual string GetAbilityDescription()
-    {
-        throw new NotImplementedException();
-    }
+    protected abstract bool TryUseAbility();
 }
 
 class TwinBlade : Warrior
@@ -224,37 +209,28 @@ class TwinBlade : Warrior
     private int _useAbilityChance = 30;
     private int _abilityAttackMultiplier = 2;
     
-    public TwinBlade(int attackDamage, int armor, int health) : base(attackDamage, armor, health) { }
+    public TwinBlade(int damage, int armor, int health) : base(damage, armor, health) { }
+ 
+    public override string Profession => "Амбидекстр";
+    public override string Ability => $"Имеет шанс нанести урон, в {_abilityAttackMultiplier} раза превышающий базовый";
     
     public override TwinBlade MakeCopy()
     {
-        return new TwinBlade(AttackDamage, Armor, Health);
+        return new TwinBlade(Damage, Armor, Health);
     }
     
-    protected override int GetAttackDamage()
+    protected override int AdjustAttackDamage()
     {
-        if (TryUseAbility())
-        {
-            Console.WriteLine($"{GetProfessionName()} наносит урон x{_abilityAttackMultiplier}");
-            return AttackDamage * _abilityAttackMultiplier;
-        }
+        if (TryUseAbility() == false)
+            return Damage;
         
-        return AttackDamage;
+        Console.WriteLine($"{Profession} наносит урон x{_abilityAttackMultiplier}");
+        return Damage * _abilityAttackMultiplier;
     }
     
     protected override bool TryUseAbility()
     {
         return Utils.GetRandomNumber(_useAbilityChanceRangeMin, _useAbilityChanceRangeMax) < _useAbilityChance;
-    }
-    
-    protected override string GetProfessionName()
-    {
-        return "Амбидекстр";
-    }
-    
-    protected override string GetAbilityDescription()
-    {
-        return $"Имеет шанс нанести урон, в {_abilityAttackMultiplier} раза превышающий базовый";
     }
 }
  
@@ -264,22 +240,23 @@ class Barbarian : Warrior
     private int _abilityUsePerAttacks = 3;
     private int _abilityAttackMultiplier = 2;
     
-    public Barbarian(int attackDamage, int armor, int health) : base(attackDamage, armor, health) { }
+    public Barbarian(int damage, int armor, int health) : base(damage, armor, health) { }
+ 
+    public override string Profession => "Варвар";
+    public override string Ability => $"Каждую {_abilityUsePerAttacks} атаку наносит x{_abilityAttackMultiplier} урон";
     
     public override Barbarian MakeCopy()
     {
-        return new Barbarian(AttackDamage, Armor, Health);
+        return new Barbarian(Damage, Armor, Health);
     }
     
-    protected override int GetAttackDamage()
+    protected override int AdjustAttackDamage()
     {
-        if (TryUseAbility())
-        {
-            Console.WriteLine($"{GetProfessionName()} наносит урон x{_abilityAttackMultiplier}");
-            return AttackDamage * _abilityAttackMultiplier;
-        }
+        if (TryUseAbility() == false)
+            return Damage;
         
-        return AttackDamage;
+        Console.WriteLine($"{Profession} наносит урон x{_abilityAttackMultiplier}");
+        return Damage * _abilityAttackMultiplier;
     }
     
     protected override bool TryUseAbility()
@@ -290,16 +267,6 @@ class Barbarian : Warrior
         _attackNumberCounter = 0;
         return true;
     }
-    
-    protected override string GetProfessionName()
-    {
-        return "Варвар";
-    }
-    
-    protected override string GetAbilityDescription()
-    {
-        return $"Каждую {_abilityUsePerAttacks} атаку наносит x{_abilityAttackMultiplier} урон";
-    }
 }
 
 class Paladin : Warrior
@@ -309,11 +276,17 @@ class Paladin : Warrior
     private int _furyIncreasePerHit = 15;
     private int _healthRestoreAmount = 40;
     
-    public Paladin(int attackDamage, int armor, int health) : base(attackDamage, armor, health) { }
+    public Paladin(int damage, int armor, int health) : base(damage, armor, health) { }
+ 
+    public override string Profession => "Паладин";
+    public override string Ability =>
+        $"Накапливает {_furyIncreasePerHit} ед. ярости при получении урона. " +
+        $"При достижении {_furyLevelMax} ед. ярости использует лечение на {_healthRestoreAmount} ед. здоровья " +
+        $"и сбрасывает уровень ярости.";
     
     public override Paladin MakeCopy()
     {
-        return new Paladin(AttackDamage, Armor, Health);
+        return new Paladin(Damage, Armor, Health);
     }
     
     protected override int AdjustIncomeDamage(int damage)
@@ -338,25 +311,13 @@ class Paladin : Warrior
         return true;
     }
     
-    protected override string GetProfessionName()
-    {
-        return "Паладин";
-    }
-    
-    protected override string GetAbilityDescription()
-    {
-        return $"Накапливает {_furyIncreasePerHit} ед. ярости при получении урона. " +
-               $"При достижении {_furyLevelMax} ед. ярости использует лечение на {_healthRestoreAmount} ед. здоровья " +
-               $"и сбрасывает уровень ярости.";
-    }
-    
     private void Heal()
     {
         if (Health == MaxHealth)
             return;
         
         int healAmount = Math.Min(Health + _healthRestoreAmount, MaxHealth);
-        Console.WriteLine($"{GetProfessionName()} лечится на {healAmount} ед.");
+        Console.WriteLine($"{Profession} лечится на {healAmount} ед.");
         
         Health += healAmount;
     }
@@ -368,22 +329,25 @@ class Warlock : Warrior
     private int _fireballManaCost = 25;
     private int _fireballDamageMultiplier = 10;
     
-    public Warlock(int attackDamage, int armor, int health) : base(attackDamage, armor, health) { }
+    public Warlock(int damage, int armor, int health) : base(damage, armor, health) { }
+    
+    public override string Profession => "Чернокнижник";
+    public override string Ability => 
+        $"Наносит x{_fireballDamageMultiplier} урона заклинанием \"Огненный шар\", пока есть мана. " +
+        $"Всего маны: {_mana}, затраты маны на заклинание: {_fireballManaCost}";
     
     public override Warlock MakeCopy()
     {
-        return new Warlock(AttackDamage, Armor, Health);
+        return new Warlock(Damage, Armor, Health);
     }
     
-    protected override int GetAttackDamage()
+    protected override int AdjustAttackDamage()
     {
-        if (TryUseAbility())
-        {
-            Console.WriteLine($"{GetProfessionName()} использует огненный шар");
-            return AttackDamage * _fireballDamageMultiplier;
-        }
+        if (TryUseAbility() == false)
+            return Damage;
         
-        return AttackDamage;
+        Console.WriteLine($"{Profession} использует огненный шар");
+        return Damage * _fireballDamageMultiplier;
     }
     
     protected override bool TryUseAbility()
@@ -394,17 +358,6 @@ class Warlock : Warrior
         _mana -= _fireballManaCost;
         return true;
     }
-    
-    protected override string GetProfessionName()
-    {
-        return "Чернокнижник";
-    }
-    
-    protected override string GetAbilityDescription()
-    {
-        return $"Наносит x{_fireballDamageMultiplier} урона заклинанием \"Огненный шар\", пока есть мана. " +
-               $"Всего маны: {_mana}, затраты маны на заклинание: {_fireballManaCost}";
-    }
 }
 
 class Trickster : Warrior
@@ -413,37 +366,28 @@ class Trickster : Warrior
     private int _useAbilityChanceRangeMax = 100;
     private int _useAbilityChance = 30;
     
-    public Trickster(int attackDamage, int armor, int health) : base(attackDamage, armor, health) { }
+    public Trickster(int damage, int armor, int health) : base(damage, armor, health) { }
+    
+    public override string Profession => "Ловкач";
+    public override string Ability => "Имеет шанс уклониться от удара";
     
     public override Trickster MakeCopy()
     {
-        return new Trickster(AttackDamage, Armor, Health);
+        return new Trickster(Damage, Armor, Health);
     }
     
     protected override int AdjustIncomeDamage(int damage)
     {
-        if (TryUseAbility())
-        {
-            Console.WriteLine($"{GetProfessionName()} уклоняется от атаки");
-            return 0;
-        }
+        if (TryUseAbility() == false)
+            return damage;
         
-        return damage;
+        Console.WriteLine($"{Profession} уклоняется от атаки");
+        return 0;
     }
     
     protected override bool TryUseAbility()
     {
         return Utils.GetRandomNumber(_useAbilityChanceRangeMin, _useAbilityChanceRangeMax) < _useAbilityChance;
-    }
-    
-    protected override string GetProfessionName()
-    {
-        return "Ловкач";
-    }
-    
-    protected override string GetAbilityDescription()
-    {
-        return $"Имеет шанс уклониться от удара";
     }
 }
 
