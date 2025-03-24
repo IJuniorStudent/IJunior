@@ -10,7 +10,7 @@ class Program
         
         while (mall.HasCustomers)
         {
-            Console.WriteLine($"Баланс магазина: {mall.Money}. Покупатели: {mall.CustomersCount}");
+            Console.WriteLine($"Баланс магазина: {mall.Balance}. Покупатели: {mall.CustomersCount}");
             
             if (mall.TryServeNextCustomer(out int customerSpentMoney))
                 Console.WriteLine($"Покупатель совершил покупку и потратил денег: {customerSpentMoney}");
@@ -20,7 +20,7 @@ class Program
             Console.WriteLine();
         }
         
-        Console.WriteLine($"Общий баланс магазина после обслуживания всех клиентов: {mall.Money}");
+        Console.WriteLine($"Общий баланс магазина после обслуживания всех клиентов: {mall.Balance}");
     }
     
     static Mall InitMall()

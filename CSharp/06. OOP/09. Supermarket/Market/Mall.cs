@@ -19,7 +19,7 @@ public class Mall : BaseTrader
     
     public void AddProducts(IEnumerable<Product> products)
     {
-        _products.AddRange(products);
+        Products.AddRange(products);
     }
     
     public bool TryServeNextCustomer(out int customerSpentMoney)
@@ -35,7 +35,7 @@ public class Mall : BaseTrader
         if (customerBasketPrice == 0)
             return false;
         
-        _money += customerBasketPrice;
+        Money += customerBasketPrice;
         customer.BuyTakenProducts();
         customerSpentMoney = customerBasketPrice;
         

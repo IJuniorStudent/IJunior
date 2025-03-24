@@ -2,20 +2,20 @@
 
 public class BaseTrader
 {
-    protected int _money;
-    protected List<Product> _products;
+    protected int Money;
+    protected List<Product> Products;
     
     public BaseTrader(int money)
     {
-        _money = money;
-        _products = new List<Product>();
+        Money = money;
+        Products = new List<Product>();
     }
     
-    public int Money => _money;
-    public int ProductsCount => _products.Count;
+    public int Balance => Money;
+    public int ProductsCount => Products.Count;
     
     public Product GetProduct(int productIndex)
     {
-        return _products[productIndex];
+        return Products[productIndex];
     }
 }
