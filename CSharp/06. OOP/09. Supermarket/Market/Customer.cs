@@ -18,16 +18,10 @@ public class Customer : BaseTrader
     public int TotalBasketPrice => _totalBasketPrice;
     public bool HasEnoughMoney => Money >= TotalBasketPrice;
     
-    public void Take(Product product)
-    {
-        Products.Add(product);
-        _totalBasketPrice += product.Price;
-    }
-
     public void Take(IEnumerable<Product> products)
     {
         foreach (var product in products)
-            Take(product);
+            AddToBasket(product);
     }
     
     public void BuyTakenProducts()
@@ -36,7 +30,7 @@ public class Customer : BaseTrader
             throw new InvalidOperationException("You cannot spend more money than you have");
         
         foreach (var product in Products)
-            _bag.Add(product.MakeCopy());
+            _bag.Add(product);
         
         Money -= _totalBasketPrice;
         
@@ -53,5 +47,11 @@ public class Customer : BaseTrader
             
             Products.RemoveAt(randomProductIndex);
         }
+    }
+    
+    private void AddToBasket(Product product)
+    {
+        Products.Add(product.MakeCopy());
+        _totalBasketPrice += product.Price;
     }
 }
