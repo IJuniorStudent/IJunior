@@ -24,13 +24,8 @@ public class Squad
     
     public void RemoveDead()
     {
-        for (int i = 0; i < _units.Count; i++)
-        {
-            if (_units[i].IsAlive)
-                continue;
-            
-            _units.RemoveAt(i);
-            i--;
-        }
+        for (int i = _units.Count - 1; i >= 0; i--)
+            if (_units[i].IsAlive == false)
+                _units.RemoveAt(i);
     }
 }

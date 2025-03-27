@@ -15,8 +15,8 @@ public class Arena
     {
         while (_redSquad.IsAlive && _blueSquad.IsAlive)
         {
-            Attack(_redSquad, _blueSquad);
-            Attack(_blueSquad, _redSquad);
+            CommandToAttack(_redSquad, _blueSquad);
+            CommandToAttack(_blueSquad, _redSquad);
         }
     }
     
@@ -32,7 +32,7 @@ public class Arena
         return _redSquad.IsAlive ? _redSquad : _blueSquad;
     }
     
-    private void Attack(Squad attacker, Squad defender)
+    private void CommandToAttack(Squad attacker, Squad defender)
     {
         if (defender.IsAlive == false)
             return;
