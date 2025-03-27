@@ -8,8 +8,8 @@ public class Sniper : Soldier
     
     public override void Attack(IReadOnlyList<IDamageable> possibleTargets)
     {
-        var targets = SelectTargets(possibleTargets);
-        var damage = Damage * _damageMultiplier;
+        IDamageable[] targets = SelectTargets(possibleTargets);
+        int damage = Damage * _damageMultiplier;
         
         foreach (var target in targets)
             target.TakeDamage(damage);
@@ -17,9 +17,6 @@ public class Sniper : Soldier
     
     public override IDamageable[] SelectTargets(IReadOnlyList<IDamageable> possibleTargets)
     {
-        int selectRangeMin = 0;
-        int selectRangeMax = possibleTargets.Count;
-        
-        return [ possibleTargets[Utils.GetRandomNumber(selectRangeMin, selectRangeMax)] ];
+        return [ possibleTargets[Utils.GetRandomNumber(possibleTargets.Count)] ];
     }
 }

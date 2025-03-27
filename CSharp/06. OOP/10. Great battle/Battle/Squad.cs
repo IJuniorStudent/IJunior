@@ -24,13 +24,13 @@ public class Squad
     
     public void RemoveDead()
     {
-        var removeCandidates = new List<Soldier>();
-        
-        foreach (var soldier in _units)
-            if (soldier.IsAlive == false)
-                removeCandidates.Add(soldier);
-        
-        foreach (var soldier in removeCandidates)
-            _units.Remove(soldier);
+        for (int i = 0; i < _units.Count; i++)
+        {
+            if (_units[i].IsAlive)
+                continue;
+            
+            _units.RemoveAt(i);
+            i--;
+        }
     }
 }

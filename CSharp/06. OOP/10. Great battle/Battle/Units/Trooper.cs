@@ -6,7 +6,7 @@ public class Trooper : Soldier
     
     public override void Attack(IReadOnlyList<IDamageable> possibleTargets)
     {
-        var targets = SelectTargets(possibleTargets);
+        IDamageable[] targets = SelectTargets(possibleTargets);
         
         foreach (var target in targets)
             target.TakeDamage(Damage);
@@ -14,9 +14,6 @@ public class Trooper : Soldier
     
     public override IDamageable[] SelectTargets(IReadOnlyList<IDamageable> possibleTargets)
     {
-        int selectRangeMin = 0;
-        int selectRangeMax = possibleTargets.Count;
-        
-        return [ possibleTargets[Utils.GetRandomNumber(selectRangeMin, selectRangeMax)] ];
+        return [ possibleTargets[Utils.GetRandomNumber(possibleTargets.Count)] ];
     }
 }

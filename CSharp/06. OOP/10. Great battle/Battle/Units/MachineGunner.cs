@@ -8,7 +8,7 @@ public class MachineGunner : Soldier
     
     public override void Attack(IReadOnlyList<IDamageable> possibleTargets)
     {
-        var targets = SelectTargets(possibleTargets);
+        IDamageable[] targets = SelectTargets(possibleTargets);
         
         foreach (var target in targets)
             target.TakeDamage(Damage);
@@ -16,13 +16,10 @@ public class MachineGunner : Soldier
     
     public override IDamageable[] SelectTargets(IReadOnlyList<IDamageable> possibleTargets)
     {
-        int selectRangeMin = 0;
-        int selectRangeMax = possibleTargets.Count;
-        
         IDamageable[] targets = new IDamageable[_maxTargets];
         
         for (int i = 0; i < _maxTargets; i++)
-            targets[i] = possibleTargets[Utils.GetRandomNumber(selectRangeMin, selectRangeMax)];
+            targets[i] = possibleTargets[Utils.GetRandomNumber(possibleTargets.Count)];
         
         return targets;
     }

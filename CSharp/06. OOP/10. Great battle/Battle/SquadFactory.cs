@@ -1,9 +1,18 @@
 ﻿namespace Practice_46.Battle;
 
-public abstract class SquadFactory
-{
-    protected SquadFactory() { }
+using Units;
 
-    public abstract Squad CreateRedTeam();
-    public abstract Squad CreateBlueTeam();
+public class SquadFactory
+{
+    public SquadFactory() { }
+
+    public Squad CreateTeam(string name)
+    {
+        return new Squad(name, [
+            new Trooper(),
+            new Sniper(),
+            new Bomber(),
+            new MachineGunner()
+        ]);
+    }
 }

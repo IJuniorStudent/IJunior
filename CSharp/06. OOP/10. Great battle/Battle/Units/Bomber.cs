@@ -8,7 +8,7 @@ public class Bomber : Soldier
     
     public override void Attack(IReadOnlyList<IDamageable> possibleTargets)
     {
-        var targets = SelectTargets(possibleTargets);
+        IDamageable[] targets = SelectTargets(possibleTargets);
         
         foreach (var target in targets)
             target.TakeDamage(Damage);
@@ -16,15 +16,14 @@ public class Bomber : Soldier
     
     public override IDamageable[] SelectTargets(IReadOnlyList<IDamageable> possibleTargets)
     {
-        int selectRangeMin = 0;
-        int selectRangeMax = possibleTargets.Count;
+        int rangeMax = possibleTargets.Count;
         
-        int maxSelectTargets = Math.Min(_maxTargets, selectRangeMax);
-        int firstSelectedIndex = Utils.GetRandomNumber(selectRangeMin, selectRangeMax);
-        IDamageable[] targets = new IDamageable[maxSelectTargets];
+        int maxTargetsCount = Math.Min(_maxTargets, rangeMax);
+        int firstSelectedIndex = Utils.GetRandomNumber(rangeMax);
+        IDamageable[] targets = new IDamageable[maxTargetsCount];
         
-        for (int i = 0; i < maxSelectTargets; i++)
-            targets[i] = possibleTargets[(firstSelectedIndex + i) % selectRangeMax];
+        for (int i = 0; i < maxTargetsCount; i++)
+            targets[i] = possibleTargets[(firstSelectedIndex + i) % rangeMax];
         
         return targets;
     }
