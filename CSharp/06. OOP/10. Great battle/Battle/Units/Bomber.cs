@@ -6,8 +6,10 @@ public class Bomber : Soldier
     
     public Bomber() : base(70, 10, 20) { }
     
-    public override void Attack(IEnumerable<IDamageable> targets)
+    public override void Attack(IReadOnlyList<IDamageable> possibleTargets)
     {
+        var targets = SelectTargets(possibleTargets);
+        
         foreach (var target in targets)
             target.TakeDamage(Damage);
     }

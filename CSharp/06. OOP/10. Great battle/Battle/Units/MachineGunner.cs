@@ -6,8 +6,10 @@ public class MachineGunner : Soldier
     
     public MachineGunner() : base(90, 10, 15) { }
     
-    public override void Attack(IEnumerable<IDamageable> targets)
+    public override void Attack(IReadOnlyList<IDamageable> possibleTargets)
     {
+        var targets = SelectTargets(possibleTargets);
+        
         foreach (var target in targets)
             target.TakeDamage(Damage);
     }

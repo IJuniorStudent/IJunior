@@ -17,7 +17,7 @@ public abstract class Soldier : IDamageable
     
     public bool IsAlive => Health > 0;
     
-    public abstract void Attack(IEnumerable<IDamageable> targets);
+    public abstract void Attack(IReadOnlyList<IDamageable> possibleTargets);
     public abstract IDamageable[] SelectTargets(IReadOnlyList<IDamageable> possibleTargets);
     
     public virtual void TakeDamage(int damage)

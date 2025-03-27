@@ -6,8 +6,9 @@ public class Sniper : Soldier
     
     public Sniper() : base(60, 20, 5) { }
     
-    public override void Attack(IEnumerable<IDamageable> targets)
+    public override void Attack(IReadOnlyList<IDamageable> possibleTargets)
     {
+        var targets = SelectTargets(possibleTargets);
         var damage = Damage * _damageMultiplier;
         
         foreach (var target in targets)

@@ -4,42 +4,33 @@ using Units;
 
 public class Squad
 {
-    private List<Soldier> _soldiers;
+    private List<Soldier> _units;
     
-    public Squad(string name)
+    public Squad(string name, IEnumerable<Soldier> soldiers)
     {
-        _soldiers = new List<Soldier>();
+        _units = new List<Soldier>(soldiers);
         Name = name;
     }
     
     public string Name { get; }
-    public bool IsAlive => _soldiers.Count > 0;
+    public bool IsAlive => _units.Count > 0;
+    public IReadOnlyList<IDamageable> Units => _units;
     
-    public void AddSoldiers(IEnumerable<Soldier> soldiers)
+    public void Attack(IReadOnlyList<IDamageable> targets)
     {
-        _soldiers.AddRange(soldiers);
+        foreach (var soldier in _units)
+            soldier.Attack(targets);
     }
     
-    public void Attack(Squad targetSquad)
+    public void RemoveDead()
     {
-        foreach (var soldier in _soldiers)
-            targetSquad.TakeDamage(soldier);
-    }
-    
-    private void TakeDamage(Soldier attacker)
-    {
-        if (IsAlive == false)
-            return;
+        var removeCandidates = new List<Soldier>();
         
-        var targets = attacker.SelectTargets(_soldiers);
-        attacker.Attack(targets);
-        
-        foreach (var target in targets)
-        {
-            var soldier = (Soldier)target;
-            
+        foreach (var soldier in _units)
             if (soldier.IsAlive == false)
-                _soldiers.Remove(soldier);
-        }
+                removeCandidates.Add(soldier);
+        
+        foreach (var soldier in removeCandidates)
+            _units.Remove(soldier);
     }
 }

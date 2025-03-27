@@ -6,7 +6,9 @@ class Program
 {
     static void Main(string[] args)
     {
-        var arena = new Arena();
+        var squadFactory = new SquadFactoryFixed();
+        var arena = new Arena(squadFactory);
+        
         arena.Fight();
         
         Squad winner = arena.GetWinner();
