@@ -9,9 +9,9 @@ class Program
         const string CommandSkipStep = "3";
         const string CommandExit = "4";
         
-        var factory = new FishFactory();
         var aquarium = new Aquarium(5);
         bool isAppRun = true;
+        bool isActionPerformed = false;
         
         while (isAppRun)
         {
@@ -29,15 +29,15 @@ class Program
             switch (Utils.ReadUserInput("Что делаем?"))
             {
                 case CommandAddFish:
-                    aquarium.AddFish(factory);
+                    isActionPerformed = aquarium.TryAddFish(new FishFactory());
                     break;
                 
                 case CommandRemoveFish:
-                    aquarium.RemoveFish();
+                    isActionPerformed = aquarium.TryRemoveFish();
                     break;
                 
                 case CommandSkipStep:
-                    aquarium.Update();
+                    isActionPerformed = true;
                     break;
                 
                 case CommandExit:
@@ -48,6 +48,11 @@ class Program
                     Utils.PrintWaitMessage("Неизвестная команда");
                     break;
             }
+            
+            if (isActionPerformed)
+                aquarium.Update();
+            
+            isActionPerformed = false;
         }
     }
 }

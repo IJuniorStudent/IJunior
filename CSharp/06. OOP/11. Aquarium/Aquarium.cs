@@ -11,36 +11,36 @@ public class Aquarium
         _population = new List<Fish>();
     }
     
-    public void AddFish(FishFactory factory)
+    public bool TryAddFish(FishFactory factory)
     {
         if (_population.Count >= _capacity)
         {
             Utils.PrintWaitMessage("Аквариум полностью занят");
-            return;
+            return false;
         }
         
         if (factory.TryCreate(out Fish fish) == false)
-            return;
+            return false;
         
         _population.Add(fish);
-        Update();
+        return true;
     }
     
-    public void RemoveFish()
+    public bool TryRemoveFish()
     {
         if (Utils.TryReadNumberInput("Введите номер рыбы, которую хотите достать", out int fishNumber) == false)
-            return;
+            return false;
 
         int fishIndex = fishNumber - 1;
 
         if (fishIndex < 0 || fishIndex >= _population.Count)
         {
             Utils.PrintWaitMessage($"Рыбы под номером {fishNumber} не существует");
-            return;
+            return false;
         }
         
         _population.RemoveAt(fishIndex);
-        Update();
+        return true;
     }
     
     public void Update()

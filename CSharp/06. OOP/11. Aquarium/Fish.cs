@@ -18,14 +18,7 @@ public class Fish
     
     public void Update()
     {
-        UpdateLifetime();
-    }
-
-    private void UpdateLifetime()
-    {
-        if (_lifetime >= _maxLifetime)
-            return;
-        
-        _lifetime += 1;
+        if (_lifetime < _maxLifetime)
+            _lifetime++;
     }
 }
