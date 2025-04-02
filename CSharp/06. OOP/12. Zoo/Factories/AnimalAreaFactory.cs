@@ -4,36 +4,63 @@ using Animals;
 
 public class AnimalAreaFactory
 {
-    private List<AnimalFactory> _factories;
+    private struct AnimalConfig
+    {
+        public string Type;
+        public string Sound;
+        
+        public AnimalConfig(string type, string sound)
+        {
+            Type = type;
+            Sound = sound;
+        }
+    }
+    
+    private List<AnimalConfig> _animalsConfig;
     
     public AnimalAreaFactory()
     {
-        _factories = InitFactoryList();
+        _animalsConfig = InitAnimalConfigs();
     }
     
-    public List<Animal> CreateAnimals(int animalCount)
+    public List<AnimalArea> Create()
+    {
+        var factory = new AnimalFactory();
+        var areas = new List<AnimalArea>();
+        int animalsCount = 5;
+        
+        for (int i = 0; i < _animalsConfig.Count; i++)
+        {
+            AnimalConfig animalConfig = _animalsConfig[i];
+            
+            areas.Add(CreateArea(factory, ref animalConfig, animalsCount));
+        }
+        
+        return areas;
+    }
+    
+    private AnimalArea CreateArea(AnimalFactory factory, ref readonly AnimalConfig config, int animalCount)
     {
         var animals = new List<Animal>();
         
         for (int i = 0; i < animalCount; i++)
         {
-            AnimalFactory factory = _factories[Utils.GetRandomNumber(_factories.Count)];
             Gender gender = (Gender)Utils.GetRandomNumber((int)Gender.Max);
             
-            animals.Add(factory.Create(gender));
+            animals.Add(factory.Create(config.Type, config.Sound, gender));
         }
         
-        return animals;
+        return new AnimalArea(animals);
     }
     
-    private List<AnimalFactory> InitFactoryList()
+    private List<AnimalConfig> InitAnimalConfigs()
     {
-        return new List<AnimalFactory>([
-            new DeerFactory(),
-            new CapybaraFactory(),
-            new KoalaFactory(),
-            new LemurFactory(),
-            new ParrotFactory()
+        return new List<AnimalConfig>([
+            new AnimalConfig("Deer", "Bellow"),
+            new AnimalConfig("Capybara", "Squeak"),
+            new AnimalConfig("Koala", "Shriek"),
+            new AnimalConfig("Lemur", "Chatter"),
+            new AnimalConfig("Parrot", "Squawk")
         ]);
     }
 }

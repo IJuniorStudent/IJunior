@@ -2,7 +2,10 @@
 
 using Animals;
 
-public abstract class AnimalFactory
+public class AnimalFactory
 {
-    public abstract Animal Create(Gender gender);
+    public Animal Create(string type, string sound, Gender gender)
+    {
+        return new Animal(type, sound, gender);
+    }
 }

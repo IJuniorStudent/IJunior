@@ -6,9 +6,9 @@ public class Zoo
 {
     private List<AnimalArea> _areas;
     
-    public Zoo(AnimalAreaFactory factory, int areasCount)
+    public Zoo(AnimalAreaFactory factory)
     {
-        _areas = InitAreas(factory, areasCount);
+        _areas = factory.Create();
     }
     
     public int AreaCount => _areas.Count;
@@ -18,7 +18,7 @@ public class Zoo
         if (int.TryParse(userInput, out int areaNumber) == false)
             return;
         
-        int areaIndex = areaNumber;
+        int areaIndex = areaNumber - 1;
         
         if (areaIndex < 0 || areaIndex >= _areas.Count)
         {
@@ -27,16 +27,5 @@ public class Zoo
         }
         
         _areas[areaIndex].Display();
-    }
-    
-    private List<AnimalArea> InitAreas(AnimalAreaFactory factory, int areasCount)
-    {
-        var areas = new List<AnimalArea>();
-        int animalsCount = 5;
-        
-        for (int i = 0; i < areasCount; i++)
-            areas.Add(new AnimalArea(factory.CreateAnimals(animalsCount)));
-        
-        return areas;
     }
 }

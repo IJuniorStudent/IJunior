@@ -8,7 +8,7 @@ class Program
     {
         const string CommandExit = "exit";
         
-        var zoo = new Zoo(new AnimalAreaFactory(), 4);
+        var zoo = new Zoo(new AnimalAreaFactory());
         bool isAppRun = true;
         int minAreaNumber = 1;
         string promptMessage = $"Введите номер вольера от {minAreaNumber} до {zoo.AreaCount} для просмотра\nИли введите \"{CommandExit}\" для выхода";
