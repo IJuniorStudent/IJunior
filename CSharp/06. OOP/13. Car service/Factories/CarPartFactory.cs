@@ -2,9 +2,9 @@
 
 public class CarPartFactory
 {
-    private List<Part> _parts;
+    private List<CarPart> _parts;
     
-    public CarPartFactory(PartFactory factory)
+    public CarPartFactory(NewPartFactory factory)
     {
         _parts = factory.Create();
     }

@@ -1,66 +1,67 @@
 ﻿namespace Practice_49;
 
-public struct InvoiceCarPart
-{
-    public string Type;
-    public int Price;
-    public bool IsDamaged;
-
-    public InvoiceCarPart(string type, int price, bool isDamaged)
-    {
-        Type = type;
-        Price = price;
-        IsDamaged = isDamaged;
-    }
-}
-
 public class Invoice
 {
-    private int _totalRepairFee;
-    private List<CarPart> _parts;
+    private Dictionary<string, int> _partsPrices;
+    private Dictionary<string, bool> _partsRepairStatus;
     
     public Invoice(IReadOnlyList<CarPart> carParts)
     {
-        _totalRepairFee = 0;
-        _parts = InitRepairList(carParts);
+        RepairFee = 0;
+        _partsPrices = new Dictionary<string, int>();
+        _partsRepairStatus = new Dictionary<string, bool>();
+        
+        InitRepairData(carParts);
     }
     
-    public int RepairFee => _totalRepairFee;
-    public int PartsCount => _parts.Count;
+    public int RepairFee { get; private set; }
+    public int PartsCount => _partsPrices.Count;
     public int RepairedCount => GetRepairedPartsCount();
-
-    public InvoiceCarPart GetPartDetails(int partIndex)
+    
+    public void RegisterRepairedPart(string partType)
     {
-        CarPart part = _parts[partIndex];
-        
-        return new InvoiceCarPart(part.Type, part.Price, part.IsDamaged);
+        _partsRepairStatus[partType] = true;
+        RepairFee += _partsPrices[partType];
     }
     
-    public void Repair(int partIndex)
+    public List<string> GetPartTypes()
     {
-        CarPart part = _parts[partIndex];
+        var partTypes = new List<string>();
         
-        part.Repair();
-        _totalRepairFee += part.Price;
+        foreach (var pair in _partsPrices)
+            partTypes.Add(pair.Key);
+        
+        return partTypes;
     }
     
-    private List<CarPart> InitRepairList(IReadOnlyList<CarPart> carParts)
+    public int GetPartRepairPrice(string partType)
     {
-        var repairList = new List<CarPart>();
-        
+        return _partsPrices[partType];
+    }
+    
+    public bool IsPartRepaired(string partType)
+    {
+        return _partsRepairStatus[partType];
+    }
+    
+    private void InitRepairData(IReadOnlyList<CarPart> carParts)
+    {
         foreach (var part in carParts)
-            if (part.IsDamaged)
-                repairList.Add(part);
-        
-        return repairList;
+        {
+            if (part.IsDamaged == false)
+                continue;
+            
+            _partsPrices.Add(part.Type, part.Price);
+            _partsRepairStatus.Add(part.Type, false);
+        }
     }
     
     private int GetRepairedPartsCount()
     {
         int count = 0;
         
-        foreach (var part in _parts)
-            if (part.IsDamaged == false)
+        foreach (var partStatus in _partsRepairStatus)
+            if (partStatus.Value)
                 count++;
         
         return count;

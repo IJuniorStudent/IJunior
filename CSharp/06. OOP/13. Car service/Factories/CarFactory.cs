@@ -4,7 +4,7 @@ public class CarFactory
 {
     private CarPartFactory _carPartFactory;
     
-    public CarFactory(PartFactory factory)
+    public CarFactory(NewPartFactory factory)
     {
         _carPartFactory = new CarPartFactory(factory);
     }

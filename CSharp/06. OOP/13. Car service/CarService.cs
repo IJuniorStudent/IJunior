@@ -4,9 +4,8 @@ using Factories;
 
 public class CarService
 {
-    private Dictionary<string, PartStorage> _storages;
+    private Dictionary<string, Shelf> _storages;
     private Queue<Car> _cars;
-    private int _money;
     private int _repairPrice;
     private int _penaltyPerPart;
     
@@ -16,10 +15,10 @@ public class CarService
         _cars = carFactory.Create();
         _repairPrice = repairPrice;
         _penaltyPerPart = penaltyPerPart;
-        _money = balance;
+        Money = balance;
     }
     
-    public int Money => _money;
+    public int Money { get; private set; }
     public int QueueSize => _cars.Count;
     public bool IsOpen => QueueSize > 0 && Money >= 0;
     
@@ -42,29 +41,33 @@ public class CarService
         {
             Console.Clear();
             
+            var damagedParts = invoice.GetPartTypes();
+            
             DisplayRepairInfo(invoice);
-            DisplayPartsToRepair(invoice);
+            DisplayPartsToRepair(damagedParts, invoice);
             
             string userInput = Utils.ReadUserInput($"Выберите деталь для замены или введите \"{CommandAbortRepair}\" для отказа от ремонта");
             
             if (userInput == CommandAbortRepair)
             {
-                _money -= CalculateAbortPenalty(invoice);
+                Money -= CalculateAbortPenalty(invoice);
                 isServe = false;
                 continue;
             }
             
-            if (TryConvertInputToIndex(userInput, invoice.PartsCount, out int index) == false)
+            if (TrySelectRepairPartType(damagedParts, userInput, out string partType) == false)
                 continue;
             
-            if (TryRepairPart(invoice, index) == false)
+            if (TryRepairPart(car, partType) == false)
                 continue;
-
-            if (invoice.PartsCount == invoice.RepairedCount)
+            
+            invoice.RegisterRepairedPart(partType);
+            
+            if (car.IsDamaged == false)
             {
                 int repairPrice = invoice.RepairFee + _repairPrice;
                 
-                _money += repairPrice;
+                Money += repairPrice;
                 isServe = false;
                 
                 Utils.PrintWaitMessage($"Машина полностью обслужена! Вы заработали: {repairPrice}");
@@ -85,28 +88,29 @@ public class CarService
         Console.WriteLine();
     }
     
-    private void DisplayPartsToRepair(Invoice invoice)
+    private void DisplayPartsToRepair(List<string> damagedParts, Invoice invoice)
     {
         Console.WriteLine("Заказ-наряд:");
         
-        for (int i = 0; i < invoice.PartsCount; i++)
+        for (int i = 0; i < damagedParts.Count; i++)
         {
-            InvoiceCarPart details = invoice.GetPartDetails(i);
-            PartStorage storage = _storages[details.Type];
+            string partType = damagedParts[i];
+            Shelf storage = _storages[partType];
+            
             string partRepairStatus =
-                details.IsDamaged ?
-                    $"Стоимость ремонта: {details.Price}. Количество на складе: {storage.Amount}" :
+                invoice.IsPartRepaired(partType) == false ?
+                    $"Стоимость ремонта: {invoice.GetPartRepairPrice(partType)}. Количество на складе: {storage.Count}" :
                     "Исправно";
             
-            Console.WriteLine($"{i + 1}. {details.Type}. {partRepairStatus}");
+            Console.WriteLine($"{i + 1}. {partType}. {partRepairStatus}");
         }
         
         Console.WriteLine();
     }
     
-    private bool TryConvertInputToIndex(string userInput, int maxValue, out int index)
+    private bool TrySelectRepairPartType(List<string> damagedParts, string userInput, out string partType)
     {
-        index = 0;
+        partType = "";
         
         if (int.TryParse(userInput, out int number) == false)
         {
@@ -114,35 +118,39 @@ public class CarService
             return false;
         }
         
-        index = number - 1;
+        int index = number - 1;
         
-        if (index < 0 || index >= maxValue)
+        if (index < 0 || index >= damagedParts.Count)
         {
             Utils.PrintWaitMessage($"Некорректный номер: {number}");
             return false;
         }
         
+        partType = damagedParts[index];
         return true;
     }
-
-    private bool TryRepairPart(Invoice invoice, int partIndex)
+    
+    private bool TryRepairPart(Car car, string partType)
     {
-        InvoiceCarPart details = invoice.GetPartDetails(partIndex);
-        PartStorage storage = _storages[details.Type];
-
-        if (details.IsDamaged == false)
+        if (car.HasPart(partType) == false)
         {
-            Utils.PrintWaitMessage("Замена детали не требуется. Еще походит");
+            Utils.PrintWaitMessage($"В машине отсутствует деталь \"{partType}\"");
             return false;
         }
         
-        if (storage.TryTake() == false)
+        if (_storages.TryGetValue(partType, out Shelf storage) == false)
         {
-            Utils.PrintWaitMessage("На складе закончилась эта деталь");
+            Utils.PrintWaitMessage($"Деталь \"{partType}\" отсутствует на складе");
             return false;
         }
         
-        invoice.Repair(partIndex);
+        if (storage.TryTake(out CarPart part) == false)
+        {
+            Utils.PrintWaitMessage($"Деталь \"{partType}\" закончилась");
+            return false;
+        }
+        
+        car.ReplacePart(part);
         return true;
     }
 }

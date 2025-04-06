@@ -2,19 +2,27 @@
 
 public class PartStorageFactory
 {
-    private List<Part> _parts;
+    private List<CarPart> _parts;
     
-    public PartStorageFactory(PartFactory factory)
+    public PartStorageFactory(NewPartFactory factory)
     {
         _parts = factory.Create();
     }
     
-    public Dictionary<string, PartStorage> Create()
+    public Dictionary<string, Shelf> Create()
     {
-        var storages = new Dictionary<string, PartStorage>(_parts.Count);
+        int shelfCapacity = 10;
+        var storages = new Dictionary<string, Shelf>(_parts.Count);
         
         foreach (var part in _parts)
-            storages.Add(part.Type, new PartStorage(part.Type, part.Price, 10));
+        {
+            List<CarPart> parts = new List<CarPart>(shelfCapacity);
+            
+            for (int i = 0; i < shelfCapacity; i++)
+                parts.Add(part.Clone());
+            
+            storages.Add(part.Type, new Shelf(parts));
+        }
         
         return storages;
     }

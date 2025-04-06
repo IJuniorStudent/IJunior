@@ -4,7 +4,7 @@ public class CarServiceFactory
 {
     public CarService Create()
     {
-        var partsFactory = new PartFactory();
+        var partsFactory = new NewPartFactory();
         
         var partStorageFactory = new PartStorageFactory(partsFactory);
         var carFactory = new CarFactory(partsFactory);

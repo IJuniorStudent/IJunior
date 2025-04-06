@@ -1,16 +1,20 @@
 ﻿namespace Practice_49;
 
-public class CarPart : Part
+public class CarPart
 {
-    public CarPart(string type, int price, bool isDamaged) : base(type, price)
+    public CarPart(string type, int price, bool isDamaged)
     {
+        Type = type;
+        Price = price;
         IsDamaged = isDamaged;
     }
     
-    public bool IsDamaged { get; private set; }
+    public string Type { get; }
+    public int Price { get; }
+    public bool IsDamaged { get; }
     
-    public void Repair()
+    public CarPart Clone()
     {
-        IsDamaged = false;
+        return new CarPart(Type, Price, IsDamaged);
     }
 }
