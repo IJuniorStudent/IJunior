@@ -9,7 +9,7 @@ class Program
         
         DisplayCriminals("Список до исключения", criminals);
         
-        criminals.RemoveAll(criminal => criminal.JailReason == exceptReason);
+        criminals = criminals.Where(criminal => criminal.JailReason != exceptReason).ToList();
         
         DisplayCriminals("Список после исключения", criminals);
     }
