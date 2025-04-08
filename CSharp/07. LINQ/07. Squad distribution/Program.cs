@@ -12,12 +12,11 @@ class Program
         
         DisplaySoldiers("Отряд до перевода", firstSquad);
         
-        secondSquad = secondSquad.Concat(
-            firstSquad
-                .Where(entry => entry.Surname.ToLower().StartsWith(surnameStart))
-        ).ToList();
+        var soldiersToMove = firstSquad
+            .Where(entry => entry.Surname.ToLower().StartsWith(surnameStart));
         
-        firstSquad = firstSquad.Except(secondSquad).ToList();
+        firstSquad = firstSquad.Except(soldiersToMove).ToList();
+        secondSquad = secondSquad.Union(soldiersToMove).ToList();
         
         DisplaySoldiers("Отряд после перевода", firstSquad);
         DisplaySoldiers("Новый отряд", secondSquad);
