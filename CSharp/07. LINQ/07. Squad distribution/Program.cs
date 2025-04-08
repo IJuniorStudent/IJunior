@@ -8,12 +8,14 @@ class Program
         
         var factory = new SoldierFactory();
         List<Soldier> firstSquad = factory.Create();
+        List<Soldier> secondSquad = new List<Soldier>();
         
         DisplaySoldiers("Отряд до перевода", firstSquad);
         
-        List<Soldier> secondSquad = firstSquad
-            .Where(entry => entry.Surname.ToLower().StartsWith(surnameStart))
-            .ToList();
+        secondSquad = secondSquad.Concat(
+            firstSquad
+                .Where(entry => entry.Surname.ToLower().StartsWith(surnameStart))
+        ).ToList();
         
         firstSquad = firstSquad.Except(secondSquad).ToList();
         
